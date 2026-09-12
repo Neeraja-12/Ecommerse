@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}MyAmazon - Frequently Asked Questions{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <header class="text-center mb-10">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-4 border-b-4 border-blue-500 inline-block pb-1">
+            Frequently Asked Questions
+        </h1>
+        <p class="text-lg text-gray-600 dark:text-gray-300">
+            Find quick answers to our most common customer queries.
+        </p>
+    </header>
+
+    <section class="space-y-6">
+        
+        <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg overflow-hidden">
+            <button class="w-full text-left p-5 font-semibold text-xl text-blue-600 dark:text-blue-400 flex justify-between items-center faq-toggle" aria-expanded="false" aria-controls="faq-content-1">
+                How can I track my order?
+                <span class="faq-icon transition-transform duration-300 transform rotate-0" aria-hidden="true">▼</span>
+            </button>
+            <div id="faq-content-1" class="p-5 pt-0 text-gray-700 dark:text-gray-300 hidden transition-all duration-300" role="region">
+                You can track your order using the tracking number provided in your shipping confirmation email. Simply click the link in the email or navigate to the "My Orders" section in your account dashboard. Tracking information usually appears 24-48 hours after shipment.
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg overflow-hidden">
+            <button class="w-full text-left p-5 font-semibold text-xl text-blue-600 dark:text-blue-400 flex justify-between items-center faq-toggle" aria-expanded="false" aria-controls="faq-content-2">
+                What is your return policy?
+                <span class="faq-icon transition-transform duration-300 transform rotate-0" aria-hidden="true">▼</span>
+            </button>
+            <div id="faq-content-2" class="p-5 pt-0 text-gray-700 dark:text-gray-300 hidden transition-all duration-300" role="region">
+                We accept returns within **30 days** of delivery for most items. The item must be in new and unused condition. Please visit our <a href="{% url 'returns' %}" class="text-blue-500 hover:text-blue-700 font-medium">Returns Policy page</a> for detailed information and instructions on initiating a return.
+            </div>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg overflow-hidden">
+            <button class="w-full text-left p-5 font-semibold text-xl text-blue-600 dark:text-blue-400 flex justify-between items-center faq-toggle" aria-expanded="false" aria-controls="faq-content-3">
+                Do you offer international shipping?
+                <span class="faq-icon transition-transform duration-300 transform rotate-0" aria-hidden="true">▼</span>
+            </button>
+            <div id="faq-content-3" class="p-5 pt-0 text-gray-700 dark:text-gray-300 hidden transition-all duration-300" role="region">
+                Yes, MyAmazon ships to over 50 countries worldwide! Shipping rates and times vary based on your destination. You can view the estimated cost and delivery time during the checkout process. Note that customers are responsible for any customs duties or import taxes.
+            </div>
+        </div>
+
+    </section>
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const toggleButtons = document.querySelectorAll('.faq-toggle');
+
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const contentId = button.getAttribute('aria-controls');
+                const content = document.getElementById(contentId);
+                const icon = button.querySelector('.faq-icon');
+                const isExpanded = button.getAttribute('aria-expanded') === 'true' || false;
+
+                // Toggle the content visibility
+                if (isExpanded) {
+                    content.classList.add('hidden');
+                    button.setAttribute('aria-expanded', 'false');
+                    icon.classList.remove('rotate-180');
+                } else {
+                    // Optional: Close all others for an accordion effect
+                    document.querySelectorAll('.faq-toggle').forEach(otherBtn => {
+                        if (otherBtn !== button) {
+                            otherBtn.setAttribute('aria-expanded', 'false');
+                            document.getElementById(otherBtn.getAttribute('aria-controls')).classList.add('hidden');
+                            otherBtn.querySelector('.faq-icon').classList.remove('rotate-180');
+                        }
+                    });
+                    
+                    content.classList.remove('hidden');
+                    button.setAttribute('aria-expanded', 'true');
+                    icon.classList.add('rotate-180');
+                }
+            });
+        });
+    });
+</script>
+{% endblock extra_scripts %}

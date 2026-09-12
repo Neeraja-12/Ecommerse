@@ -1,0 +1,96 @@
+{% extends 'store/base.html' %}
+{% block title %}{{ product.title }} | MyAmazon{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto p-6">
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="flex flex-col md:flex-row gap-6">
+            <!-- Product Image -->
+            <div class="md:w-1/2">
+                <img src="{{ product.image }}" alt="{{ product.title }}" 
+                     class="w-full h-64 object-contain rounded-lg"
+                     onerror="this.src='https://via.placeholder.com/400'">
+            </div>
+            
+            <!-- Product Details -->
+            <div class="md:w-1/2">
+                <h1 class="text-2xl font-bold mb-2">{{ product.title }}</h1>
+                <p class="text-gray-600 mb-4">{{ product.description }}</p>
+                
+                <!-- Rating -->
+                <div class="flex items-center mb-4">
+                    <div class="flex text-yellow-400">
+                        <span>⭐</span>
+                        <span>⭐</span>
+                        <span>⭐</span>
+                        <span>⭐</span>
+                        <span class="text-gray-300">⭐</span>
+                    </div>
+                    <span class="ml-2 text-gray-600">4.1</span>
+                </div>
+                
+                <p class="text-3xl font-bold text-green-600 mb-4">${{ product.price }}</p>
+                
+                <!-- WORKING Add to Cart Form -->
+                <form action="{% url 'add_to_cart' product.id %}" method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="quantity" value="1">
+    <button type="submit" class="btn btn-primary">🛒 Add to Cart</button>
+</form>
+
+                <!-- Alternative Methods -->
+                <div class="mt-4 space-y-2">
+                    <p class="text-sm text-gray-600 text-center">Or try:</p>
+                    
+                    <!-- Direct Link Fallback -->
+                    <a href="{% url 'add_to_cart' product.id %}" 
+                       class="block text-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                       🔗 Add via Direct Link
+                    </a>
+                    
+                    <!-- GET Method Fallback -->
+                    <form method="GET" action="{% url 'add_to_cart' product.id %}">
+                        <button type="submit" 
+                                class="w-full bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors">
+                            📤 Add via GET
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debug Info -->
+    <div class="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        <h3 class="font-bold text-yellow-800 mb-2">Debug Information:</h3>
+        <p class="text-sm text-yellow-700">
+            Session Key: <code>{{ request.session.session_key|default:"None" }}</code><br>
+            Cart Items: {{ request.session.cart.items|length|default:0 }}<br>
+            Product ID: {{ product.id }}
+        </p>
+    </div>
+</div>
+
+<!-- JavaScript to ensure form works -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Product page loaded');
+    
+    // Add click listener to all add-to-cart buttons
+    const addToCartButtons = document.querySelectorAll('button[type="submit"], a[href*="add_to_cart"]');
+    addToCartButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            console.log('Add to cart clicked:', this.textContent);
+        });
+    });
+
+    // Log form submissions
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            console.log('Form submitted:', this.action);
+        });
+    });
+});
+</script>
+{% endblock %}

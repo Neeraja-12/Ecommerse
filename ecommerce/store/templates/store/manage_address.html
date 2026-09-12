@@ -1,0 +1,28 @@
+{% extends 'store/base.html' %}
+{% block title %}Manage Addresses | MyAmazon{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-8">
+    <h2 class="text-2xl font-bold mb-6">Your Addresses</h2>
+
+    <div class="mb-8">
+        {% for address in addresses %}
+            <div class="bg-white p-4 rounded-lg shadow mb-4">
+                <p>{{ address.full_name }}</p>
+                <p>{{ address.address_line1 }}, {{ address.city }}, {{ address.state }}, {{ address.country }}</p>
+                <p>{{ address.phone_number }}</p>
+                {% if address.default %}<span class="text-green-600 font-semibold">Default</span>{% endif %}
+            </div>
+        {% empty %}
+            <p>No addresses added yet.</p>
+        {% endfor %}
+    </div>
+
+    <h3 class="text-xl font-semibold mb-4">Add New Address</h3>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Save Address</button>
+    </form>
+</div>
+{% endblock %}

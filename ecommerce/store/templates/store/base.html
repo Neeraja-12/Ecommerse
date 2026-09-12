@@ -1,0 +1,248 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}MyAmazon{% endblock %}</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="icon" href="{% static 'images/favicon.png' %}" type="image/png">
+
+  <style>
+    body { font-family: 'Poppins', sans-serif; transition: background 0.3s, color 0.3s; }
+    .dark-mode { background-color: #0f172a; color: white; }
+
+    #loading-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999; display: none;
+    }
+
+    .spinner { width: 3rem; height: 3rem; border: 5px solid #ccc; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #search-suggestions {
+      position: absolute; background: white; border: 1px solid #ddd;
+      width: 100%; max-height: 200px; overflow-y: auto;
+      border-radius: 0.5rem; display: none; z-index: 50;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    #search-suggestions div { padding: 8px 10px; cursor: pointer; }
+    #search-suggestions div:hover { background-color: #f1f5f9; }
+
+    footer a:hover { text-decoration: underline; }
+
+    .toast {
+      position: fixed; top: 20px; right: 20px;
+      padding: 12px 20px; border-radius: 8px;
+      color: white; z-index: 1000;
+      transform: translateX(400px);
+      transition: transform 0.3s ease;
+    }
+    .toast.show { transform: translateX(0); }
+    .toast.success { background-color: #10b981; }
+    .toast.error { background-color: #ef4444; }
+    .toast.info { background-color: #3b82f6; }
+  </style>
+</head>
+
+<body class="bg-gray-50 dark:bg-slate-900">
+
+  <!-- Loading Overlay -->
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Navbar -->
+  <nav class="bg-blue-600 text-white shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center px-4 py-3">
+      
+      <a href="{% url 'home' %}" class="text-2xl font-bold flex items-center">
+        <span class="mr-2">🛒</span> My<span class="text-yellow-400">Amazon</span>
+      </a>
+
+      <!-- Search -->
+      <div class="relative w-1/2">
+        <form id="search-form" method="GET" action="{% url 'home' %}">
+          <input id="search-input" name="q" value="{{ request.GET.q }}"
+            placeholder="Search products..."
+            class="w-full px-4 py-2 rounded-full text-black focus:ring-2 focus:ring-yellow-400 outline-none">
+        </form>
+        <div id="search-suggestions"></div>
+      </div>
+
+      <!-- Nav Icons -->
+      <div class="flex items-center space-x-6">
+        {% if user.is_authenticated %}
+          <span class="hidden md:block">Hi, {{ user.username }}</span>
+          <form method="post" action="{% url 'logout' %}" class="inline">
+            {% csrf_token %}
+            <button type="submit" class="hover:text-yellow-400">Logout</button>
+          </form>
+        {% else %}
+          <a href="{% url 'login' %}" class="hover:text-yellow-400">Login</a>
+          <a href="{% url 'signup' %}" class="hover:text-yellow-400 hidden md:inline">Sign Up</a>
+        {% endif %}
+
+        <!-- Cart -->
+        <a href="{% url 'cart' %}" class="relative hover:text-yellow-400">
+          🛒
+          <span id="cart-count"
+            class="absolute -top-2 -right-2 bg-yellow-400 text-xs text-black px-1.5 rounded-full">
+            {{ request.session.cart.items|length|default:0 }}
+          </span>
+        </a>
+
+        <button id="dark-mode-toggle" class="text-xl">🌙</button>
+        <!-- ✅ Add this link inside your navbar (e.g., after Cart) -->
+
+      </div>
+    </div>
+  </nav>
+
+  {% if messages %}
+  <div class="max-w-7xl mx-auto px-4 mt-4">
+    {% for message in messages %}
+    <div class="p-4 rounded-lg mb-4 {% if message.tags == 'success' %}bg-green-100 text-green-800 border border-green-200
+                {% elif message.tags == 'error' %}bg-red-100 text-red-800 border border-red-200
+                {% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800 border border-yellow-200
+                {% else %}bg-blue-100 text-blue-800 border border-blue-200{% endif %}">
+      <div class="flex items-center">
+        <span class="mr-2">
+          {% if message.tags == 'success' %}✅
+          {% elif message.tags == 'error' %}❌
+          {% elif message.tags == 'warning' %}⚠️
+          {% else %}ℹ️{% endif %}
+        </span>
+        {{ message }}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <main class="min-h-screen">{% block content %}{% endblock %}</main>
+
+  <!-- Footer -->
+  <footer class="bg-blue-900 text-white py-8 mt-10">
+    <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 px-4">
+      <div>
+        <h4 class="font-semibold mb-2">About</h4>
+        <ul class="space-y-1 text-sm text-gray-300">
+          <li><a href="#" class="hover:text-yellow-400">Company Info</a></li>
+          <li><a href="#" class="hover:text-yellow-400">Careers</a></li>
+          <li><a href="#" class="hover:text-yellow-400">Press</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-2">Help</h4>
+        <ul class="space-y-1 text-sm text-gray-300">
+          <li><a href="#" class="hover:text-yellow-400">Customer Support</a></li>
+          <li><a href="#" class="hover:text-yellow-400">Shipping</a></li>
+          <li><a href="#" class="hover:text-yellow-400">Returns</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-2">Contact</h4>
+        <ul class="space-y-1 text-sm text-gray-300">
+          <li><a href="tel:+919999999999" class="hover:text-yellow-400">+91 99999 99999</a></li>
+          <li><a href="mailto:support@myamazon.com" class="hover:text-yellow-400">support@myamazon.com</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-2">Follow Us</h4>
+        <div class="flex space-x-4">
+          <a href="#" class="hover:text-yellow-400 text-lg">📘</a>
+          <a href="#" class="hover:text-yellow-400 text-lg">🐦</a>
+          <a href="#" class="hover:text-yellow-400 text-lg">📸</a>
+          <a href="#" class="hover:text-yellow-400 text-lg">▶️</a>
+        </div>
+      </div>
+    </div>
+    <div class="text-center text-gray-400 text-sm mt-6">&copy; 2025 MyAmazon. All rights reserved.</div>
+  </footer>
+
+  <script>
+    const csrftoken = '{{ csrf_token }}';
+
+    // 🌙 Dark mode
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark-mode');
+      darkModeToggle.textContent = '☀️';
+    }
+    darkModeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      darkModeToggle.textContent = isDark ? '☀️' : '🌙';
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+
+    // ⏳ Loading overlay
+    const overlay = document.getElementById('loading-overlay');
+    function showLoading() { overlay.style.display = 'flex'; }
+    function hideLoading() { overlay.style.display = 'none'; }
+
+    // 🔥 Toast
+    function showToast(msg, type = 'info') {
+      const toastContainer = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = msg;
+      toastContainer.appendChild(toast);
+      setTimeout(() => toast.classList.add('show'), 100);
+      setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 4000);
+    }
+
+    // 🛒 Cart add
+    async function addToCart(productId, qty = 1) {
+      try {
+        showLoading();
+        const formData = new FormData();
+        formData.append('product_id', productId);
+        formData.append('quantity', qty);
+        formData.append('csrfmiddlewaretoken', csrftoken);
+
+        const res = await fetch(`/cart/add/${productId}/`, { method: 'POST', body: formData });
+        if (!res.ok) throw new Error('Network error');
+        const data = await res.json();
+
+        updateCartCount(data.cart_count || 0);
+        showToast('Product added to cart!', 'success');
+      } catch (err) {
+        console.error(err);
+        showToast('Failed to add product.', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function updateCartCount(count) {
+      const cartCount = document.getElementById('cart-count');
+      cartCount.textContent = count;
+      cartCount.classList.add('animate-bounce');
+      setTimeout(() => cartCount.classList.remove('animate-bounce'), 600);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.preventDefault();
+          addToCart(btn.dataset.productId, btn.dataset.quantity || 1);
+        });
+      });
+    });
+  </script>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

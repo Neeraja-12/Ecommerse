@@ -1,0 +1,62 @@
+{% extends 'store/base.html' %}
+{% block title %}Order Confirmation | MyAmazon{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-10">
+
+  <div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">✅ Thank you for your order!</h1>
+
+    <!-- 🔹 Order Summary -->
+    <h2 class="text-xl font-semibold mb-4 text-gray-700">Order Summary</h2>
+    {% if cart_items %}
+    <div class="divide-y divide-gray-200 mb-6">
+      {% for item in cart_items %}
+      <div class="flex justify-between py-2">
+        <span class="text-gray-800">{{ item.title }} x {{ item.quantity }}</span>
+        <span class="text-gray-900 font-semibold">${{ item.price|floatformat:2 }}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="flex justify-between mt-4 border-t border-gray-300 pt-4 font-semibold text-gray-900">
+      <span>Total</span>
+      <span>${{ total_price|floatformat:2 }}</span>
+    </div>
+    {% else %}
+      <p class="text-gray-500">No items in the order.</p>
+    {% endif %}
+
+    <!-- 🔹 Shipping Information -->
+    <h2 class="text-xl font-semibold mt-8 mb-4 text-gray-700">Shipping Information</h2>
+    <div class="bg-gray-50 p-4 rounded-lg shadow-inner mb-6">
+      <p><strong>Full Name:</strong> {{ request.POST.full_name|default:"Not Provided" }}</p>
+      <p><strong>Phone:</strong> {{ request.POST.phone_number|default:"Not Provided" }}</p>
+      <p><strong>Address:</strong> 
+        {{ request.POST.address_line1|default:"" }}{% if request.POST.address_line2 %}, {{ request.POST.address_line2 }}{% endif %}, 
+        {{ request.POST.city|default:"" }}, {{ request.POST.state|default:"" }} - {{ request.POST.postal_code|default:"" }}, 
+        {{ request.POST.country|default:"" }}
+      </p>
+    </div>
+
+    <!-- 🔹 Payment Method -->
+    <h2 class="text-xl font-semibold mb-4 text-gray-700">Payment Method</h2>
+    <div class="bg-gray-50 p-4 rounded-lg shadow-inner text-gray-800 font-medium mb-6">
+      {{ request.session.payment_method|default:"Not Selected" }}
+    </div>
+
+    <div class="text-center mt-6">
+      <a href="{% url 'home' %}" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-semibold">
+        Continue Shopping
+      </a>
+    </div>
+    <div class="text-center mt-6">
+  <a href="{% url 'track_order' %}"
+     class="bg-green-600 text-white px-5 py-2 rounded-md hover:bg-green-700">
+     🔍 Track Your Order
+  </a>
+</div>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+myenv/
+venv/
+ecommerce/myenv/
+__pycache__/
+*.pyc
+.env
+db.sqlite3
+ecommerce/db.sqlite3
+ecommerce/debug.log
+ecommerce.zipecommerce_duplicate_backup/
+ecommerce.zip
+ecommerce_duplicate_backup/

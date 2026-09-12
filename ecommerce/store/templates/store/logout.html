@@ -1,0 +1,142 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Logout - MyAmazon{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <!-- Logo -->
+        <div class="flex justify-center">
+            <a href="{% url 'home' %}" class="text-4xl">🛒</a>
+        </div>
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            You've been logged out
+        </h2>
+        <p class="mt-2 text-center text-sm text-gray-600">
+            Thanks for visiting MyAmazon
+        </p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="bg-white py-8 px-4 shadow-2xl sm:rounded-3xl sm:px-10 border border-gray-100">
+            <!-- Success Message -->
+            <div class="rounded-md bg-green-50 p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-green-800">
+                            Successfully logged out
+                        </h3>
+                        <div class="mt-2 text-sm text-green-700">
+                            <p>You have been securely logged out of your MyAmazon account.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Information -->
+            <div class="bg-blue-50 rounded-lg p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-blue-800">
+                            Security Notice
+                        </h3>
+                        <div class="mt-2 text-sm text-blue-700">
+                            <p>For security reasons, please close your browser if you're on a shared computer.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-4">
+                <!-- Login Again Button -->
+                <a href="{% url 'login' %}" 
+                   class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 transform hover:scale-105">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                    </svg>
+                    Sign in again
+                </a>
+
+                <!-- Back to Home Button -->
+                <a href="{% url 'home' %}" 
+                   class="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-xl shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    Back to home page
+                </a>
+            </div>
+
+            <!-- Additional Information -->
+            <div class="mt-6 text-center">
+                <p class="text-xs text-gray-500">
+                    Having trouble? <a href="#" class="font-medium text-blue-600 hover:text-blue-500">Contact support</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="mt-8 grid grid-cols-3 gap-4 text-center">
+            <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+                <div class="text-2xl font-bold text-blue-600">10K+</div>
+                <div class="text-xs text-gray-600">Happy Customers</div>
+            </div>
+            <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+                <div class="text-2xl font-bold text-green-600">5K+</div>
+                <div class="text-xs text-gray-600">Products</div>
+            </div>
+            <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+                <div class="text-2xl font-bold text-purple-600">24/7</div>
+                <div class="text-xs text-gray-600">Support</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Auto-redirect timer (optional) -->
+<script>
+    // Optional: Redirect to home page after 10 seconds
+    setTimeout(function() {
+        window.location.href = "{% url 'home' %}";
+    }, 10000); // 10 seconds
+
+    // Display countdown
+    let seconds = 10;
+    const countdownElement = document.createElement('div');
+    countdownElement.className = 'text-center mt-4 text-sm text-gray-500';
+    countdownElement.innerHTML = `Redirecting to home page in <span class="font-bold">${seconds}</span> seconds...`;
+    document.querySelector('.sm\\:mx-auto').appendChild(countdownElement);
+
+    const countdownInterval = setInterval(function() {
+        seconds--;
+        countdownElement.innerHTML = `Redirecting to home page in <span class="font-bold">${seconds}</span> seconds...`;
+        
+        if (seconds <= 0) {
+            clearInterval(countdownInterval);
+        }
+    }, 1000);
+</script>
+
+<style>
+    .bg-blue-50 {
+        background-color: #eff6ff;
+    }
+    .bg-green-50 {
+        background-color: #f0fdf4;
+    }
+    .shadow-2xl {
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+</style>
+{% endblock %}

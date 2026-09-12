@@ -1,0 +1,55 @@
+{% extends 'store/base.html' %}
+{% block title %}Order Successful | MyAmazon{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-16 text-center">
+  <div class="max-w-2xl mx-auto bg-white shadow-lg rounded-2xl p-10">
+
+    <!-- ✅ Success Icon -->
+    <div class="text-green-500 mb-6">
+      <svg class="w-24 h-24 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+      </svg>
+    </div>
+
+    <!-- ✅ Main Message -->
+    <h1 class="text-3xl font-bold text-gray-800 mb-4">Order Placed Successfully!</h1>
+    <p class="text-gray-600 mb-8">
+      Thank you for your purchase. Your order has been confirmed and will be processed shortly.
+    </p>
+
+    <!-- ✅ Order Summary -->
+    {% if order %}
+    <div class="bg-gray-50 p-6 rounded-lg shadow-inner text-left mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Order Summary</h2>
+      <div class="space-y-2 text-gray-700">
+        <p><strong>Order ID:</strong> {{ order.id }}</p>
+        <p><strong>Customer:</strong> {{ order.user.username }}</p>
+        <p><strong>Total Amount:</strong> ₹{{ order.total_amount }}</p>
+        <p><strong>Payment Status:</strong> {{ order.payment_status|default:"Pending" }}</p>
+        <p><strong>Date:</strong> {{ order.created_at|date:"F j, Y, g:i a" }}</p>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- ✅ Buttons -->
+    <div class="flex justify-center gap-4">
+      <a href="{% url 'home' %}" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
+        Continue Shopping
+      </a>
+      <a href="{% url 'cart' %}" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition">
+        View Cart
+      </a>
+    </div>
+
+    <!-- ✅ Optional Auto Redirect (after 5 seconds) -->
+    {# 
+    <script>
+      setTimeout(() => {
+        window.location.href = "{% url 'home' %}";
+      }, 5000);
+    </script>
+    #}
+  </div>
+</div>
+{% endblock %}

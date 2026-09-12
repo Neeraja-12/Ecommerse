@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}MyAmazon - Discover Amazing Products{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <meta name="description" content="MyAmazon - Your one-stop shop for amazing products at unbeatable prices. Free shipping, secure payments, and easy returns.">
+  <meta name="keywords" content="ecommerce, shopping, products, deals, online store">
+  
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+  
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+</head>
+<body class="bg-gray-50 font-sans antialiased flex flex-col min-h-screen">
+
+    <nav class="bg-gradient-to-r from-blue-700 to-purple-700 text-white shadow-xl sticky top-0 z-50">
+    <div class="container mx-auto px-4 sm:px-6 py-4">
+      <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+        
+                <a href="{% url 'home' %}" class="text-2xl font-black flex items-center space-x-2 hover:scale-105 transition-transform duration-200">
+          <span>🛍️</span>
+          <span>MyAmazon</span>
+        </a>
+
+                <div class="hidden md:flex items-center space-x-8">
+          <a href="{% url 'home' %}" 
+             class="hover:text-yellow-300 font-semibold transition-colors duration-200 py-2 border-b-2 border-transparent hover:border-yellow-300">
+            Home
+          </a>
+          <a href="{% url 'home' %}?category=electronics" 
+             class="hover:text-yellow-300 font-semibold transition-colors duration-200 py-2 border-b-2 border-transparent hover:border-yellow-300">
+            📱 Electronics
+          </a>
+          <a href="{% url 'home' %}?category=fashion" 
+             class="hover:text-yellow-300 font-semibold transition-colors duration-200 py-2 border-b-2 border-transparent hover:border-yellow-300">
+            👕 Fashion
+          </a>
+          <a href="{% url 'home' %}?category=home" 
+             class="hover:text-yellow-300 font-semibold transition-colors duration-200 py-2 border-b-2 border-transparent hover:border-yellow-300">
+            🏠 Home & Living
+          </a>
+          <a href="{% url 'home' %}?category=books" 
+             class="hover:text-yellow-300 font-semibold transition-colors duration-200 py-2 border-b-2 border-transparent hover:border-yellow-300">
+            📚 Books
+          </a>
+          <a href="{% url 'home' %}?category=toys" 
+             class="hover:text-yellow-300 font-semibold transition-colors duration-200 py-2 border-b-2 border-transparent hover:border-yellow-300">
+            🧸 Toys
+          </a>
+          <a href="{% url 'home' %}?category=sports" 
+             class="hover:text-yellow-300 font-semibold transition-colors duration-200 py-2 border-b-2 border-transparent hover:border-yellow-300">
+            ⚽ Sports
+          </a>
+        </div>
+
+                <div class="flex items-center space-x-6">
+                    <a href="{% url 'cart' %}" class="relative hover:text-yellow-300 transition-colors duration-200">
+            <span class="text-xl">🛒</span>
+            {% comment %} Initial cart count from Django context (for non-AJAX load) {% endcomment %}
+            <span id="cart-badge-container">
+              {% if cart_count and cart_count > 0 %}
+              <span id="cart-count-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                {{ cart_count }}
+              </span>
+              {% else %}
+              <span id="cart-count-badge" class="hidden absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">0</span>
+              {% endif %}
+            </span>
+          </a>
+          
+                    <a href="{% url 'account' %}" class="hover:text-yellow-300 transition-colors duration-200">
+            <span class="text-xl">👤</span>
+          </a>
+        </div>
+
+                <button class="md:hidden text-2xl hover:text-yellow-300 transition-colors duration-200" 
+                onclick="toggleMobileMenu()">
+            ☰
+        </button>
+      </div>
+
+            <div id="mobileMenu" class="hidden md:hidden mt-4 pb-4 border-t border-blue-600 pt-4">
+        <div class="flex flex-col space-y-4">
+          <a href="{% url 'home' %}" class="hover:text-yellow-300 font-semibold py-2">Home</a>
+          <a href="{% url 'home' %}?category=electronics" class="hover:text-yellow-300 font-semibold py-2">📱 Electronics</a>
+          <a href="{% url 'home' %}?category=fashion" class="hover:text-yellow-300 font-semibold py-2">👕 Fashion</a>
+          <a href="{% url 'home' %}?category=home" class="hover:text-yellow-300 font-semibold py-2">🏠 Home & Living</a>
+          <a href="{% url 'home' %}?category=books" class="hover:text-yellow-300 font-semibold py-2">📚 Books</a>
+          <a href="{% url 'home' %}?category=toys" class="hover:text-yellow-300 font-semibold py-2">🧸 Toys</a>
+          <a href="{% url 'home' %}?category=sports" class="hover:text-yellow-300 font-semibold py-2">⚽ Sports</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+    <div class="bg-gradient-to-r from-blue-50 to-purple-50 py-6 shadow-inner">
+    <div class="container mx-auto px-4 sm:px-6">
+      <form method="get" action="{% url 'home' %}" class="max-w-4xl mx-auto">
+        <div class="flex shadow-lg rounded-xl overflow-hidden transform hover:scale-105 transition-transform duration-300">
+          <input type="text" 
+                 name="q" 
+                 value="{{ request.GET.q|default:'' }}"
+                 placeholder="What are you looking for today? 🔍" 
+                 class="flex-1 px-6 py-4 text-gray-800 text-lg focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-50">
+          <button type="submit" 
+                  class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 font-bold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center">
+            <span class="mr-2">🔍</span> Search
+          </button>
+        </div>
+        
+                <div class="flex flex-wrap justify-center gap-3 mt-4">
+          <span class="text-sm text-gray-600 font-semibold">Popular:</span>
+          <a href="{% url 'home' %}?q=laptop" class="text-sm bg-white px-3 py-1 rounded-full hover:bg-blue-100 transition-colors duration-200">Laptop</a>
+          <a href="{% url 'home' %}?q=phone" class="text-sm bg-white px-3 py-1 rounded-full hover:bg-blue-100 transition-colors duration-200">Phone</a>
+          <a href="{% url 'home' %}?q=book" class="text-sm bg-white px-3 py-1 rounded-full hover:bg-blue-100 transition-colors duration-200">Book</a>
+          <a href="{% url 'home' %}?q=shoes" class="text-sm bg-white px-3 py-1 rounded-full hover:bg-blue-100 transition-colors duration-200">Shoes</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+    <main class="flex-1 container mx-auto px-4 sm:px-6 py-8">
+    {% block content %}
+        {% endblock %}
+  </main>
+
+    <footer class="bg-gradient-to-r from-gray-900 to-gray-800 text-gray-300 py-12">
+    <div class="container mx-auto px-4 sm:px-6">
+      
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        
+                <div>
+          <h3 class="text-2xl font-black text-white mb-4 flex items-center">
+            <span class="mr-2">🛍️</span> MyAmazon
+          </h3>
+          <p class="text-gray-400 leading-relaxed">
+            Your trusted online shopping destination. Amazing products, unbeatable prices, and exceptional service.
+          </p>
+        </div>
+
+                <div>
+          <h4 class="text-lg font-bold text-white mb-4">Quick Links</h4>
+          <ul class="space-y-3">
+            <li><a href="{% url 'home' %}" class="hover:text-yellow-300 transition-colors duration-200">Home</a></li>
+            <li><a href="{% url 'about' %}" class="hover:text-yellow-300 transition-colors duration-200">About Us</a></li>
+            <li><a href="{% url 'contact' %}" class="hover:text-yellow-300 transition-colors duration-200">Contact</a></li>
+            <li><a href="{% url 'faq' %}" class="hover:text-yellow-300 transition-colors duration-200">FAQ</a></li>
+          </ul>
+        </div>
+
+                <div>
+          <h4 class="text-lg font-bold text-white mb-4">Customer Service</h4>
+          <ul class="space-y-3">
+            <li><a href="{% url 'shipping' %}" class="hover:text-yellow-300 transition-colors duration-200">🚚 Shipping Info</a></li>
+            <li><a href="{% url 'returns' %}" class="hover:text-yellow-300 transition-colors duration-200">↩️ Returns</a></li>
+            <li><a href="{% url 'privacy' %}" class="hover:text-yellow-300 transition-colors duration-200">🔒 Privacy Policy</a></li>
+            <li><a href="{% url 'terms' %}" class="hover:text-yellow-300 transition-colors duration-200">📄 Terms of Service</a></li>
+          </ul>
+        </div>
+
+                <div>
+          <h4 class="text-lg font-bold text-white mb-4">Contact Us</h4>
+          <ul class="space-y-3">
+            <li class="flex items-center">
+              <span class="mr-2">📧</span> support@myamazon.com
+            </li>
+            <li class="flex items-center">
+              <span class="mr-2">📞</span> 1-800-MYAMAZON
+            </li>
+            <li class="flex items-center">
+              <span class="mr-2">🕒</span> 24/7 Customer Support
+            </li>
+          </ul>
+        </div>
+      </div>
+
+            <div class="border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-center">
+        <p class="text-gray-400 text-sm mb-4 md:mb-0">
+          © 2025 MyAmazon. All Rights Reserved. | Made with ❤️ for amazing shoppers
+        </p>
+        
+                <div class="flex space-x-4">
+          <a href="#" class="text-gray-400 hover:text-yellow-300 transition-colors duration-200 text-xl">📘</a>
+          <a href="#" class="text-gray-400 hover:text-yellow-300 transition-colors duration-200 text-xl">🐦</a>
+          <a href="#" class="text-gray-400 hover:text-yellow-300 transition-colors duration-200 text-xl">📷</a>
+          <a href="#" class="text-gray-400 hover:text-yellow-300 transition-colors duration-200 text-xl">💼</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+    <script>
+    
+    // ===========================================
+    // 1. Dynamic Cart Count AJAX Implementation
+    // ===========================================
+    function updateCartCount() {
+      const badge = document.getElementById('cart-count-badge');
+      
+      if (!badge) {
+        console.error('Cart badge element not found.');
+        return;
+      }
+
+      // Note: You need a URL named 'cart_count_api' in your urls.py
+      const apiUrl = "{% url 'cart_count_api' %}"; 
+      
+      fetch(apiUrl)
+        .then(response => {
+          // Check if the response is valid JSON
+          if (!response.ok) {
+            throw new Error('Network response was not ok: ' + response.statusText);
+          }
+          return response.json();
+        })
+        .then(data => {
+          const count = parseInt(data.cart_count, 10);
+          
+          if (isNaN(count)) {
+            console.error('Invalid cart count received:', data.cart_count);
+            return;
+          }
+          
+          badge.textContent = count;
+          
+          if (count > 0) {
+            badge.classList.remove('hidden');
+          } else {
+            badge.classList.add('hidden');
+          }
+        })
+        .catch(error => {
+          console.error('Failed to fetch cart count:', error);
+          // Hide badge if API call fails
+          badge.classList.add('hidden');
+        });
+    }
+
+    // Run on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initial load to ensure it's up-to-date even after a redirect from add_to_cart
+      updateCartCount();
+      
+      // OPTIONAL: Periodically update the cart count (less common for a simple shop)
+      // setInterval(updateCartCount, 60000); // Update every 60 seconds
+    });
+
+
+    // ===========================================
+    // 2. Listen for custom events to trigger update
+    // (This is how child templates will tell the base to refresh the count)
+    // ===========================================
+    document.addEventListener('cartUpdated', updateCartCount);
+
+
+    // ===========================================
+    // 3. Mobile Menu & Smooth Scroll
+    // ===========================================
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobileMenu');
+      menu.classList.toggle('hidden');
+    }
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', function(event) {
+      const menu = document.getElementById('mobileMenu');
+      const button = document.querySelector('button[onclick="toggleMobileMenu()"]');
+      
+      if (!menu.contains(event.target) && !button.contains(event.target)) {
+        menu.classList.add('hidden');
+      }
+    });
+
+    // Add smooth scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>

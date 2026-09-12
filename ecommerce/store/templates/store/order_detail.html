@@ -1,0 +1,64 @@
+{% extends 'store/base.html' %}
+{% block title %}Order Details | MyAmazon{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">Order Details</h1>
+    
+    <div class="bg-white shadow-lg rounded-lg p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h2 class="text-xl font-semibold mb-4">Order Information</h2>
+                <p><strong>Order ID:</strong> {{ order.id }}</p>
+                <p><strong>Order Date:</strong> {{ order.created_at|date:"F j, Y" }}</p>
+                <p><strong>Status:</strong> <span class="font-semibold">{{ order.status|title }}</span></p>
+                <p><strong>Total:</strong> ${{ order.total_price }}</p>
+                <p><strong>Tracking Number:</strong> {{ order.tracking_number }}</p>
+            </div>
+            
+            <div>
+                <h2 class="text-xl font-semibold mb-4">Shipping Address</h2>
+                {% if order.shipping_address %}
+                    <p>{{ order.shipping_address.street }}</p>
+                    <p>{{ order.shipping_address.city }}, {{ order.shipping_address.state }} {{ order.shipping_address.zip_code }}</p>
+                    <p>{{ order.shipping_address.country }}</p>
+                {% else %}
+                    <p>No shipping address provided</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="mt-8">
+            <h2 class="text-xl font-semibold mb-4">Order Items</h2>
+            <div class="space-y-4">
+                {% for item in order_items %}
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                            <span class="text-gray-500 text-sm">Image</span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">{{ item.product_title }}</h3>
+                            <p class="text-gray-600">Quantity: {{ item.quantity }}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-semibold">${{ item.price }}</p>
+                        <p class="text-gray-600">Total: ${{ item.total_price }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="mt-8 flex justify-between">
+            <a href="{% url 'order_history' %}" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+                ← Back to Order History
+            </a>
+            <a href="{% url 'track_order_detail' order.id %}" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
+                Track Order ›
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

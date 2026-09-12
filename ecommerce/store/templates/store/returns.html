@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}MyAmazon - Returns and Refunds Policy{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <header class="text-center mb-10">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-4 border-b-4 border-blue-500 inline-block pb-1">
+            Returns & Refund Policy
+        </h1>
+        <p class="text-lg text-gray-600 dark:text-gray-300">
+            Learn about our process for returning items and receiving refunds.
+        </p>
+    </header>
+
+    <section class="space-y-6 text-gray-700 dark:text-gray-300">
+        
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold text-blue-600 dark:text-blue-400 mb-3">1. Eligibility for Returns</h2>
+            <ul class="list-disc list-inside space-y-2 ml-4">
+                <li>Items must be returned within **30 days** of the delivery date.</li>
+                <li>Products must be unused, in original packaging, and in the same condition that you received them.</li>
+                <li>Perishable goods, custom products, and gift cards are exempt from being returned.</li>
+            </ul>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold text-blue-600 dark:text-blue-400 mb-3">2. How to Initiate a Return</h2>
+            <ol class="list-decimal list-inside space-y-2 ml-4">
+                <li>Log in to your **Account** and navigate to 'Order History'.</li>
+                <li>Select the order containing the item you wish to return.</li>
+                <li>Click the 'Request Return' button and follow the prompts.</li>
+                <li>You will receive a return authorization number (RMA) and shipping instructions.</li>
+            </ol>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold text-blue-600 dark:text-blue-400 mb-3">3. Refunds</h2>
+            <p class="mb-3">
+                Once your return is received and inspected, we will send you an email notification.
+            </p>
+            <ul class="list-disc list-inside space-y-2 ml-4">
+                <li>If approved, your refund will be processed, and a credit will automatically be applied to your original method of payment within **7-10 business days**.</li>
+                <li>Shipping costs are non-refundable. If you receive a refund, the cost of return shipping will be deducted from your refund.</li>
+            </ul>
+        </div>
+        
+    </section>
+
+</div>
+{% endblock content %}

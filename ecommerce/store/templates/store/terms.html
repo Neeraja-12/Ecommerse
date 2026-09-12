@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}MyAmazon - Terms of Service{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <header class="text-center mb-10">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-4 border-b-4 border-blue-500 inline-block pb-1">
+            Terms of Service
+        </h1>
+        <p class="text-lg text-gray-600 dark:text-gray-300">
+            Please read these terms and conditions carefully before using our service.
+        </p>
+    </header>
+
+    <section class="space-y-6 text-gray-700 dark:text-gray-300">
+        
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold text-blue-600 dark:text-blue-400 mb-3">1. Agreement to Terms</h2>
+            <p>
+                By accessing or using the MyAmazon service, you agree to be bound by these Terms of Service and all terms incorporated by reference. If you do not agree to all of these terms, do not use the service.
+            </p>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold text-blue-600 dark:text-blue-400 mb-3">2. User Account and Security</h2>
+            <ul class="list-disc list-inside space-y-2 ml-4">
+                <li>You are responsible for maintaining the confidentiality of your account password.</li>
+                <li>You agree to notify MyAmazon immediately of any unauthorized use of your account.</li>
+                <li>You must be at least 18 years old to create an account and place an order.</li>
+            </ul>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold text-blue-600 dark:text-blue-400 mb-3">3. Product Information and Pricing</h2>
+            <p>
+                MyAmazon attempts to ensure that product descriptions and pricing are accurate. However, we do not warrant that product descriptions or other content is accurate, complete, reliable, current, or error-free. Prices are subject to change without notice.
+            </p>
+        </div>
+        
+    </section>
+
+</div>
+{% endblock content %}

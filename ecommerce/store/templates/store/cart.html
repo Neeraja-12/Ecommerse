@@ -1,0 +1,146 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Your Cart | MyAmazon{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-center mb-8">🛒 Your Shopping Cart</h1>
+
+    {% if messages %}
+    <div class="mb-6">
+        {% for message in messages %}
+        <div class="p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if cart_items %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Cart Items -->
+        <div class="lg:col-span-2">
+            <div class="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">Cart Items ({{ cart_items|length }})</h2>
+                
+                <div class="space-y-6">
+                    {% for item in cart_items %}
+                    <div class="flex flex-col sm:flex-row items-start justify-between p-4 border dark:border-slate-600 rounded-lg">
+                        <div class="flex items-start space-x-4 mb-4 sm:mb-0">
+                            {% if item.image %}
+                            <img src="{{ item.image }}" alt="{{ item.name }}" class="w-20 h-20 object-cover rounded">
+                            {% else %}
+                            <div class="w-20 h-20 bg-gray-200 dark:bg-slate-700 rounded flex items-center justify-center">
+                                <span class="text-gray-500 dark:text-gray-400 text-2xl">📦</span>
+                            </div>
+                            {% endif %}
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-lg dark:text-white">{{ item.name }}</h3>
+                                <div class="flex items-center mt-2">
+                                    <p class="text-green-600 font-bold text-xl">${{ item.price }}</p>
+                                </div>
+                                <p class="text-green-600 dark:text-green-400 text-sm mt-1">
+                                    {% if item.stock <= 5 %}
+                                    Only {{ item.stock }} left in stock
+                                    {% else %}
+                                    In stock
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between w-full sm:w-auto space-x-4">
+                            <!-- Quantity Controls -->
+                            <div class="flex items-center space-x-2">
+                                <form action="{% url 'update_quantity' item.id 'decrease' %}" method="POST" class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="w-8 h-8 bg-gray-200 dark:bg-slate-700 rounded hover:bg-gray-300 dark:hover:bg-slate-600">-</button>
+                                </form>
+                                <span class="font-semibold dark:text-white w-8 text-center">{{ item.quantity }}</span>
+                                <form action="{% url 'update_quantity' item.id 'increase' %}" method="POST" class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="w-8 h-8 bg-gray-200 dark:bg-slate-700 rounded hover:bg-gray-300 dark:hover:bg-slate-600">+</button>
+                                </form>
+                            </div>
+                            <p class="font-bold text-lg dark:text-white">${{ item.subtotal|floatformat:2 }}</p>
+                            <form action="{% url 'remove_from_cart' item.id %}" method="POST" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" class="text-red-500 dark:text-red-400 hover:text-red-700">🗑️</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Clear Cart / Continue Shopping -->
+                <div class="mt-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+                    <form action="{% url 'clear_cart' %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="text-red-500 dark:text-red-400 hover:text-red-700 font-semibold">Clear Cart</button>
+                    </form>
+                    <a href="{% url 'home' %}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 font-semibold">← Continue Shopping</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="lg:col-span-1">
+            <div class="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6 sticky top-4">
+                <h2 class="text-xl font-semibold mb-4 dark:text-white">Order Summary</h2>
+                
+                <div class="space-y-2 mb-4">
+                    <div class="flex justify-between dark:text-gray-300">
+                        <span>Subtotal ({{ total_quantity }} items)</span>
+                        <span>${{ total_amount_with_shipping|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex justify-between dark:text-gray-300">
+                        <span>Shipping</span>
+                        <span class="{% if shipping == 0 %}text-green-600 dark:text-green-400{% endif %}">
+                            {% if shipping == 0 %}FREE{% else %}${{ order_shipping_cost }}{% endif %}
+                        </span>
+                    </div>
+                    <div class="flex justify-between dark:text-gray-300">
+                        <span>Tax</span>
+                        <span>${{ tax|floatformat:2 }}</span>
+                    </div>
+                    {% if total_savings > 0 %}
+                    <div class="flex justify-between text-green-600 dark:text-green-400">
+                        <span>Total Savings</span>
+                        <span>-${{ total_savings|floatformat:2 }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="border-t dark:border-slate-600 pt-2 mt-2">
+                        <div class="flex justify-between font-bold text-lg">
+                            <span class="dark:text-white">Total</span>
+                            <span class="text-blue-600 dark:text-blue-400">${{ total_amount|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {% if user.is_authenticated %}
+                <a href="{% url 'checkout' %}" class="w-full bg-yellow-400 hover:bg-yellow-500 text-black py-3 rounded-lg font-semibold text-center block transition-colors mb-3">
+                    Proceed to Checkout
+                </a>
+                {% else %}
+                <a href="{% url 'login' %}?next={% url 'cart' %}" class="w-full bg-yellow-400 hover:bg-yellow-500 text-black py-3 rounded-lg font-semibold text-center block transition-colors mb-3">
+                    Login to Checkout
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Empty Cart -->
+    <div class="text-center py-16 bg-white dark:bg-slate-800 rounded-lg">
+        <div class="text-6xl mb-4">🛒</div>
+        <h2 class="text-2xl font-bold mb-4 dark:text-white">Your cart is empty</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-8">Start shopping to add some amazing products!</p>
+        <a href="{% url 'home' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+            Start Shopping
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

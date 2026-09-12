@@ -1,0 +1,58 @@
+{% extends 'store/base.html' %}
+{% block title %}Test Add to Cart{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">🧪 Test Add to Cart</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Test Product 1 -->
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-bold mb-2">Product 1</h3>
+            <p class="text-gray-600 mb-4">Fjallraven Backpack - $109.95</p>
+            <form action="{% url 'add_to_cart' 1 %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                    Add to Cart
+                </button>
+            </form>
+        </div>
+
+        <!-- Test Product 2 -->
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-bold mb-2">Product 2</h3>
+            <p class="text-gray-600 mb-4">Mens T-Shirt - $22.30</p>
+            <form action="{% url 'add_to_cart' 2 %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                    Add to Cart
+                </button>
+            </form>
+        </div>
+
+        <!-- Test Product 3 -->
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-bold mb-2">Product 3</h3>
+            <p class="text-gray-600 mb-4">Mens Jacket - $55.99</p>
+            <form action="{% url 'add_to_cart' 3 %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                    Add to Cart
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="mt-8 space-y-4">
+        <a href="{% url 'cart' %}" class="block bg-green-600 text-white py-3 px-6 rounded text-center hover:bg-green-700">
+            🛒 View Cart
+        </a>
+        <a href="{% url 'add_test_product' %}" class="block bg-purple-600 text-white py-3 px-6 rounded text-center hover:bg-purple-700">
+            🧪 Add Test Product (Guaranteed)
+        </a>
+        <a href="{% url 'nuclear_reset' %}" class="block bg-red-600 text-white py-3 px-6 rounded text-center hover:bg-red-700">
+            💥 Nuclear Reset
+        </a>
+    </div>
+</div>
+{% endblock %}
