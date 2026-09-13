@@ -1,0 +1,24 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Order History | MyAmazon{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-10 max-w-4xl">
+  <h1 class="text-3xl font-bold text-gray-800 mb-8">Order history</h1>
+  {% if orders %}
+    <div class="space-y-4">
+      {% for order in orders %}
+        <a href="{% url 'order_detail' order.id %}" class="block bg-white p-6 rounded-2xl shadow-md hover:shadow-lg">
+          <div class="flex justify-between gap-4">
+            <span class="font-semibold">Order #{{ order.id }}</span>
+            <span class="capitalize text-blue-700">{{ order.status }}</span>
+          </div>
+          <p class="text-gray-600 mt-2">{{ order.created_at|date:"F j, Y" }} · ₹{{ order.total_amount }}</p>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="bg-white p-8 rounded-2xl shadow-md text-center text-gray-600">You have not placed any orders yet.</div>
+  {% endif %}
+</div>
+{% endblock %}

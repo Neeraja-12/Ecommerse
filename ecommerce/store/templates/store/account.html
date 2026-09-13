@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "store/base.html" %}
 
 {% block title %}MyAmazon - My Account{% endblock %}
 
@@ -23,17 +23,17 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'account_orders' %}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md dark:text-gray-300 dark:hover:bg-gray-700">
+                    <a href="{% url 'order_history' %}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md dark:text-gray-300 dark:hover:bg-gray-700">
                         My Orders
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'account_profile' %}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md dark:text-gray-300 dark:hover:bg-gray-700">
+                    <a href="{% url 'account' %}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md dark:text-gray-300 dark:hover:bg-gray-700">
                         Profile & Settings
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'account_addresses' %}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md dark:text-gray-300 dark:hover:bg-gray-700">
+                    <a href="{% url 'address_list' %}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md dark:text-gray-300 dark:hover:bg-gray-700">
                         Addresses
                     </a>
                 </li>

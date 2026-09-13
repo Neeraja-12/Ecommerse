@@ -1,0 +1,33 @@
+{% extends 'store/base.html' %}
+
+{% block title %}My Addresses | MyAmazon{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-10 max-w-4xl">
+  <div class="flex items-center justify-between mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">My Addresses</h1>
+    <a href="{% url 'add_address' %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Add address</a>
+  </div>
+  {% if addresses %}
+    <div class="grid gap-4">
+      {% for address in addresses %}
+        <article class="bg-white p-6 rounded-2xl shadow-md">
+          <div class="flex justify-between gap-4">
+            <div>
+              <h2 class="font-semibold text-lg">{{ address.full_name }}{% if address.is_default %} <span class="text-sm text-green-600">(Default)</span>{% endif %}</h2>
+              <p class="text-gray-600">{{ address.get_full_address }}</p>
+              <p class="text-gray-600">{{ address.phone_number }}</p>
+            </div>
+            <div class="space-x-3 whitespace-nowrap">
+              <a href="{% url 'edit_address' address.id %}" class="text-blue-600 hover:underline">Edit</a>
+              <a href="{% url 'delete_address' address.id %}" class="text-red-600 hover:underline">Delete</a>
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="bg-white p-8 rounded-2xl shadow-md text-center text-gray-600">You have not saved an address yet.</div>
+  {% endif %}
+</div>
+{% endblock %}

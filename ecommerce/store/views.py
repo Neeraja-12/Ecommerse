@@ -8,7 +8,7 @@ from django.core.cache import cache
 from django.utils import timezone
 from django.db import transaction
 from django.contrib.sessions.backends.db import SessionStore
-from .models import Product, Cart,Order, OrderItem, OrderTracking
+from .models import Category, Product, Cart, Order, OrderItem, OrderTracking
 from django.db.models import Sum
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -206,7 +206,7 @@ def home(request):
     # ✅ If you also use API products:
     try:
         api_products = get_all_products()  # only if you still want to keep API ones
-    except:
+    except requests.RequestException:
         api_products = []
 
     # Combine both lists
@@ -262,6 +262,33 @@ def product_detail(request, product_id):
     return render(request, 'store/product_detail.html', {'product': product, 'related_products': related})
 
 
+def get_or_create_local_product(product_id):
+    """Resolve a catalog product to the local database for cart/order support."""
+    try:
+        return Product.objects.get(id=product_id)
+    except (Product.DoesNotExist, ValueError, TypeError):
+        external_product = get_product_from_cache_or_api(product_id)
+        if not external_product:
+            return None
+
+        category_name = external_product.get('category') or 'general'
+        category, _ = Category.objects.get_or_create(name=category_name)
+        sku = f"external-{external_product['id']}"
+        product, _ = Product.objects.get_or_create(
+            sku=sku,
+            defaults={
+                'title': external_product['title'],
+                'description': external_product.get('description', ''),
+                'price': Decimal(str(external_product['price'])),
+                'image': external_product.get('image'),
+                'category': category,
+                'stock_quantity': 0,
+                'in_stock': True,
+            },
+        )
+        return product
+
+
 # Cart views: note URL name expected for cart page is 'cart' in redirects
 
 def cart_view(request):
@@ -282,8 +309,16 @@ def cart_view(request):
 
 @require_POST
 def add_to_cart(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-    quantity = int(request.POST.get('quantity', 1))
+    product = get_or_create_local_product(product_id)
+    if not product:
+        messages.error(request, 'Product not found')
+        return redirect('home')
+
+    try:
+        quantity = int(request.POST.get('quantity', 1))
+    except (TypeError, ValueError):
+        quantity = 1
+    quantity = max(1, min(quantity, 99))
 
     # ---- SESSION CART ----
     cart = request.session.get('cart', {'items': {}})
@@ -291,21 +326,6 @@ def add_to_cart(request, product_id):
     items[str(product.id)] = items.get(str(product.id), 0) + quantity
     request.session['cart'] = cart
     request.session.modified = True
-
-    # ---- DATABASE CART ----
-    if not request.session.session_key:
-        request.session.create()
-
-    if request.user.is_authenticated:
-        cart_item, created = Cart.objects.get_or_create(user=request.user, product=product)
-    else:
-        cart_item, created = Cart.objects.get_or_create(session_key=request.session.session_key, product=product)
-
-    if not created:
-        cart_item.quantity += quantity
-    else:
-        cart_item.quantity = quantity
-    cart_item.save()
 
     messages.success(request, f"✅ {product.title} added to your cart.")
     return redirect('cart')
@@ -323,14 +343,6 @@ def remove_from_cart(request, product_id):
         messages.success(request, 'Item removed from cart')
     else:
         messages.error(request, 'Item not found in cart')
-
-    # ✅ Remove from database cart
-    session_key = request.session.session_key or request.session.create()
-
-    if request.user.is_authenticated:
-        Cart.objects.filter(user=request.user, product_id=product_id).delete()
-    else:
-        Cart.objects.filter(session_key=session_key, product_id=product_id).delete()
 
     return redirect('cart')
 
@@ -372,11 +384,6 @@ def decrease_quantity(request, product_id):
 def clear_cart(request):
     request.session['cart'] = {'items': {}}
     request.session.modified = True
-
-    if request.user.is_authenticated:
-        Cart.objects.filter(user=request.user).delete()
-    else:
-        Cart.objects.filter(session_key=request.session.session_key).delete()
 
     messages.info(request, "🧹 Your cart has been cleared.")
     return redirect('cart')
@@ -624,9 +631,9 @@ def add_address(request):
         if form.is_valid():
             address = form.save(commit=False)
             address.user = request.user
-            if form.cleaned_data.get('default') or not UserAddress.objects.filter(user=request.user).exists():
-                UserAddress.objects.filter(user=request.user, default=True).update(default=False)
-                address.default = True
+            if form.cleaned_data.get('is_default') or not UserAddress.objects.filter(user=request.user).exists():
+                UserAddress.objects.filter(user=request.user, is_default=True).update(is_default=False)
+                address.is_default = True
             address.save()
             messages.success(request, 'Address added')
             return redirect('address_list')
@@ -673,28 +680,29 @@ def subscribe_newsletter(request):
 
 
 def faq_view(request):
-    return render(request, 'faq.html', {})
+    return render(request, 'store/faq.html')
 
 
 def shipping_view(request):
-    return render(request, 'shipping.html', {})
+    return render(request, 'store/shipping.html')
 
 
 def returns_view(request):
-    return render(request, 'returns.html', {})
+    return render(request, 'store/returns.html')
 
 
 def privacy_view(request):
-    return render(request, 'privacy.html', {})
+    return render(request, 'store/privacy.html')
 
 
 def terms_view(request):
-    return render(request, 'terms.html', {})
+    return render(request, 'store/terms.html')
 
 
 @login_required
 def account_view(request):
-    return render(request, 'account.html', {'user': request.user})
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')[:5]
+    return render(request, 'store/account.html', {'user': request.user, 'orders': orders})
 
 def about(request):
     return render(request, 'store/about.html')
@@ -702,16 +710,25 @@ def about(request):
 from django.shortcuts import render, get_object_or_404
 from .models import Order
 
+@login_required
 def track_order_detail(request, order_id):
-    order = get_object_or_404(Order, id=order_id)
+    order = get_object_or_404(Order, id=order_id, user=request.user)
     return render(request, 'store/track_order_detail.html', {'order': order})
 
 def track_order_by_number(request):
     if request.method == 'POST':
-        order_number = request.POST.get('order_number')
-        # Here, you can later add logic to check order details by order number
-        message = f"Tracking info for Order #{order_number} (feature under development)."
-        return render(request, 'store/track_order_result.html', {'message': message})
+        order_number = request.POST.get('order_number', '').strip()
+        order = Order.objects.filter(tracking_number=order_number).first()
+        if not order and order_number.isdigit():
+            order = Order.objects.filter(id=int(order_number)).first()
+        if order:
+            return render(request, 'store/track_order_result.html', {
+                'message': f'Order #{order.id} is currently {order.get_status_display().lower()}.',
+                'order': order,
+            })
+        return render(request, 'store/track_order_result.html', {
+            'message': 'No order was found for that tracking number.'
+        })
     
     return render(request, 'store/track_order.html')
 
@@ -754,19 +771,12 @@ def add_to_cart_api(request):
     return JsonResponse({'message': 'Added to cart successfully', 'cart_count': cart_count})
 
 def cart_count_api(request):
-    cart_count = 0
-    if request.user.is_authenticated:
-        try:
-            cart_items = OrderItem.objects.filter(
-                order__user=request.user,
-                order__is_paid=False
-            )
-            cart_count = sum(item.quantity for item in cart_items)
-        except Exception as e:
-            print("Error in cart_count_api:", e)
-    else:
-        cart = request.session.get('cart', {})
-        cart_count = sum(cart.values())
+    cart = request.session.get('cart', {'items': {}})
+    cart_count = sum(
+        max(0, int(quantity))
+        for quantity in cart.get('items', {}).values()
+        if str(quantity).lstrip('-').isdigit()
+    )
 
     return JsonResponse({'cart_count': cart_count})
 
@@ -776,8 +786,7 @@ def custom_logout(request):
     return redirect('home')
 
 def cart(request):
-    # Initialize session cart if missing
-    cart = request.session.get('cart', {'items': {}})
+    cart = ensure_cart_session(request)
     cart_items = []
     total_amount = Decimal('0.00')
     total_quantity = 0
@@ -785,8 +794,11 @@ def cart(request):
     # ---- SESSION CART ----
     for product_id, quantity in cart['items'].items():
         try:
-            product = Product.objects.get(id=product_id)
-            price = Decimal(str(product.discounted_price or product.price))
+            product = get_or_create_local_product(product_id)
+            if not product:
+                continue
+            quantity = max(1, int(quantity))
+            price = product.get_final_price()
             subtotal = price * quantity
 
             cart_items.append({
@@ -800,32 +812,8 @@ def cart(request):
             })
             total_amount += subtotal
             total_quantity += quantity
-        except Product.DoesNotExist:
+        except (Product.DoesNotExist, ValueError, TypeError):
             continue
-
-    # ---- DATABASE CART (if user logged in) ----
-    if request.user.is_authenticated:
-        db_cart_items = Cart.objects.filter(user=request.user)
-    else:
-        session_key = request.session.session_key or request.session.save()
-        db_cart_items = Cart.objects.filter(session_key=request.session.session_key)
-
-    for db_item in db_cart_items:
-        product = db_item.product
-        price = Decimal(str(product.discounted_price or product.price))
-        subtotal = price * db_item.quantity
-
-        cart_items.append({
-            'id': product.id,
-            'name': product.title,
-            'price': price,
-            'quantity': db_item.quantity,
-            'subtotal': subtotal,
-            'image': product.image or (product.local_image.url if getattr(product, 'local_image', None) else ''),
-            'stock': getattr(product, 'stock_quantity', 0),
-        })
-        total_amount += subtotal
-        total_quantity += db_item.quantity
 
     # ---- COMPUTE TOTALS ----
     shipping = Decimal('0.00') if total_amount >= 50 else Decimal('5.00')
@@ -855,8 +843,9 @@ def get_product_by_id(product_id):
     except Product.DoesNotExist:
         return None
 
+@login_required
 def checkout(request):
-    cart = request.session.get('cart', {'items': {}, 'total': 0})
+    cart = ensure_cart_session(request)
     cart_items = []
     total_price = Decimal('0.00')
     total_quantity = 0
@@ -864,8 +853,11 @@ def checkout(request):
     # ---- Loop through session cart ----
     for product_id, quantity in cart['items'].items():
         try:
-            product = Product.objects.get(id=product_id)
-            subtotal = Decimal(product.price) * quantity
+            product = get_or_create_local_product(product_id)
+            if not product:
+                continue
+            quantity = max(1, int(quantity))
+            subtotal = product.get_final_price() * quantity
             cart_items.append({
                 'product': product,
                 'quantity': quantity,
@@ -873,7 +865,7 @@ def checkout(request):
             })
             total_price += subtotal
             total_quantity += quantity
-        except Product.DoesNotExist:
+        except (Product.DoesNotExist, ValueError, TypeError):
             continue
 
     # ---- Shipping & total ----
@@ -883,11 +875,12 @@ def checkout(request):
     # ---- Save Order ----
     if request.method == 'POST':
         order = Order.objects.create(
-            user=request.user if request.user.is_authenticated else None,
+            user=request.user,
             total_price=total_price,
             total_amount=total_amount,
             order_shipping_cost=order_shipping_cost,
-            status='Pending'
+            status='pending',
+            payment_method=request.POST.get('payment_method', 'cash_on_delivery'),
         )
 
         # Save Order Items
@@ -901,6 +894,7 @@ def checkout(request):
 
         # Clear cart
         request.session['cart'] = {'items': {}}
+        request.session.modified = True
 
         return render(request, 'store/order_success.html', {'order': order})
 

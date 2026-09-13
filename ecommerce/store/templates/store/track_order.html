@@ -1,0 +1,18 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Track Order | MyAmazon{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-12 max-w-xl">
+  <div class="bg-white p-8 rounded-2xl shadow-md">
+    <h1 class="text-3xl font-bold text-gray-800 mb-3 text-center">Track your order</h1>
+    <p class="text-gray-600 text-center mb-6">Enter your order ID or tracking number.</p>
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <label for="order-number" class="block font-medium text-gray-700">Order number</label>
+      <input id="order-number" name="order_number" required class="w-full border rounded-lg px-4 py-3" placeholder="e.g. 42 or TRKABCD12345678">
+      <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-semibold">Find order</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

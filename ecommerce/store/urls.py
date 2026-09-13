@@ -1,12 +1,5 @@
 from django.urls import path
-from . import views,test_urls
-# CORRECT:
 from . import views
-# OR
-from store import views
-
-# NOT:
-# This might be the issue!
 
 
 urlpatterns = [
@@ -25,7 +18,6 @@ urlpatterns = [
     path('cart/decrease/<int:product_id>/', views.decrease_quantity, name='decrease_quantity'),
     path('clear-cart/', views.clear_cart, name='clear_cart'),
     
-    # Testing URLs
     # Order URLs
     path('checkout/', views.checkout, name='checkout'),
     path('order-success/', views.order_success, name='order_success'),
@@ -35,17 +27,6 @@ urlpatterns = [
     path('order-history/', views.order_history, name='order_history'),
     path('track-order/<int:order_id>/', views.track_order_detail, name='track_order_detail'),
     path('track-order/', views.track_order_by_number, name='track_order_by_number'),
-    path('debug-urls/', views.debug_urls, name='debug_urls'),
-    path('test-track/', test_urls.test_track_order, name='test_track'),
-    path('test/', test_urls.test_view, name='test'),
-    
-    
-     # Add this to your urls.py temporarily
-    
-    path('debug-track/', views.debug_track, name='debug_track'),  # ADD THIS
-    path('test-simple/', views.simple_test, name='test_simple'),
-   
-    
     # Address URLs
     path('addresses/', views.address_list, name='address_list'),
     path('addresses/add/', views.add_address, name='add_address'),

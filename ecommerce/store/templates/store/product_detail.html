@@ -38,24 +38,6 @@
     <button type="submit" class="btn btn-primary">🛒 Add to Cart</button>
 </form>
 
-                <!-- Alternative Methods -->
-                <div class="mt-4 space-y-2">
-                    <p class="text-sm text-gray-600 text-center">Or try:</p>
-                    
-                    <!-- Direct Link Fallback -->
-                    <a href="{% url 'add_to_cart' product.id %}" 
-                       class="block text-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-                       🔗 Add via Direct Link
-                    </a>
-                    
-                    <!-- GET Method Fallback -->
-                    <form method="GET" action="{% url 'add_to_cart' product.id %}">
-                        <button type="submit" 
-                                class="w-full bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors">
-                            📤 Add via GET
-                        </button>
-                    </form>
-                </div>
             </div>
         </div>
     </div>
