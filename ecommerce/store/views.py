@@ -45,13 +45,13 @@ def get_custom_product(product_id):
         '3': {'id': 3, 'title': 'Mens Cotton Jacket', 'price': 55.99, 'category': "men's clothing", 'description': 'Great outerwear jackets', 'image': 'https://fakestoreapi.com/img/71li-ujtlUL._AC_UX679_.jpg'},
         '4': {'id': 4, 'title': 'Mens Casual Slim Fit', 'price': 15.99, 'category': "men's clothing", 'description': 'The color could be slightly different', 'image': 'https://fakestoreapi.com/img/71YXzeOuslL._AC_UY879_.jpg'},
         '5': {'id': 5, 'title': 'Gold Micrometer', 'price': 695.00, 'category': 'jewelery', 'description': 'Satisfaction Guaranteed', 'image': 'https://fakestoreapi.com/img/71pWzhdJNwL._AC_UL640_QL65_ML3_.jpg'},
-        '21': {'id': 21, 'title': 'Stylish Hat', 'price': 25.99, 'category': 'fashion', 'description': 'Cool unisex fashion hat', 'image': 'https://via.placeholder.com/200'},
-        '22': {'id': 22, 'title': 'Designer Watch', 'price': 150.00, 'category': 'fashion', 'description': 'Luxury stainless steel wristwatch', 'image': 'https://via.placeholder.com/200'},
-        '23': {'id': 23, 'title': 'Leather Handbag', 'price': 110.50, 'category': 'fashion', 'description': 'Elegant premium leather handbag', 'image': 'https://via.placeholder.com/200'},
-        '31': {'id': 31, 'title': 'Modern Lamp', 'price': 45.50, 'category': 'home', 'description': 'Stylish bedside lamp', 'image': 'https://via.placeholder.com/200'},
-        '32': {'id': 32, 'title': 'Wooden Chair', 'price': 89.00, 'category': 'home', 'description': 'Comfortable oak chair', 'image': 'https://via.placeholder.com/200'},
-        '41': {'id': 41, 'title': 'Python Programming', 'price': 30.00, 'category': 'books', 'description': 'Learn Python step-by-step', 'image': 'https://via.placeholder.com/200'},
-        '42': {'id': 42, 'title': 'Django for Beginners', 'price': 35.00, 'category': 'books', 'description': 'A guide to Django web framework', 'image': 'https://via.placeholder.com/200'},
+        '21': {'id': 21, 'title': 'Stylish Hat', 'price': 25.99, 'category': 'fashion', 'description': 'Cool unisex fashion hat', 'image': 'https://picsum.photos/200?random=21'},
+        '22': {'id': 22, 'title': 'Designer Watch', 'price': 150.00, 'category': 'fashion', 'description': 'Luxury stainless steel wristwatch', 'image': 'https://picsum.photos/200?random=22'},
+        '23': {'id': 23, 'title': 'Leather Handbag', 'price': 110.50, 'category': 'fashion', 'description': 'Elegant premium leather handbag', 'image': 'https://picsum.photos/200?random=23'},
+        '31': {'id': 31, 'title': 'Modern Lamp', 'price': 45.50, 'category': 'home', 'description': 'Stylish bedside lamp', 'image': 'https://picsum.photos/200?random=31'},
+        '32': {'id': 32, 'title': 'Wooden Chair', 'price': 89.00, 'category': 'home', 'description': 'Comfortable oak chair', 'image': 'https://picsum.photos/200?random=32'},
+        '41': {'id': 41, 'title': 'Python Programming', 'price': 30.00, 'category': 'books', 'description': 'Learn Python step-by-step', 'image': 'https://picsum.photos/200?random=41'},
+        '42': {'id': 42, 'title': 'Django for Beginners', 'price': 35.00, 'category': 'books', 'description': 'A guide to Django web framework', 'image': 'https://picsum.photos/200?random=42'},
     }
     return custom_products.get(str(product_id))
 
@@ -100,13 +100,13 @@ def get_all_products():
 
     # Append custom products
     custom_products = [
-        {'id': 21, 'title': 'Stylish Hat', 'price': 25.99, 'category': 'fashion', 'description': 'Cool unisex fashion hat', 'image': 'https://via.placeholder.com/200'},
-        {'id': 22, 'title': 'Designer Watch', 'price': 150.00, 'category': 'fashion', 'description': 'Luxury stainless steel wristwatch', 'image': 'https://via.placeholder.com/200'},
-        {'id': 23, 'title': 'Leather Handbag', 'price': 110.50, 'category': 'fashion', 'description': 'Elegant premium leather handbag', 'image': 'https://via.placeholder.com/200'},
-        {'id': 31, 'title': 'Modern Lamp', 'price': 45.50, 'category': 'home', 'description': 'Stylish bedside lamp', 'image': 'https://via.placeholder.com/200'},
-        {'id': 32, 'title': 'Wooden Chair', 'price': 89.00, 'category': 'home', 'description': 'Comfortable oak chair', 'image': 'https://via.placeholder.com/200'},
-        {'id': 41, 'title': 'Python Programming', 'price': 30.00, 'category': 'books', 'description': 'Learn Python step-by-step', 'image': 'https://via.placeholder.com/200'},
-        {'id': 42, 'title': 'Django for Beginners', 'price': 35.00, 'category': 'books', 'description': 'A guide to Django web framework', 'image': 'https://via.placeholder.com/200'},
+        {'id': 21, 'title': 'Stylish Hat', 'price': 25.99, 'category': 'fashion', 'description': 'Cool unisex fashion hat', 'image': 'https://picsum.photos/200?random=1'},
+        {'id': 22, 'title': 'Designer Watch', 'price': 150.00, 'category': 'fashion', 'description': 'Luxury stainless steel wristwatch', 'image': 'https://picsum.photos/200?random=1'},
+        {'id': 23, 'title': 'Leather Handbag', 'price': 110.50, 'category': 'fashion', 'description': 'Elegant premium leather handbag', 'image': 'https://picsum.photos/200?random=1'},
+        {'id': 31, 'title': 'Modern Lamp', 'price': 45.50, 'category': 'home', 'description': 'Stylish bedside lamp', 'image': 'https://picsum.photos/200?random=1'},
+        {'id': 32, 'title': 'Wooden Chair', 'price': 89.00, 'category': 'home', 'description': 'Comfortable oak chair', 'image': 'https://picsum.photos/200?random=1'},
+        {'id': 41, 'title': 'Python Programming', 'price': 30.00, 'category': 'books', 'description': 'Learn Python step-by-step', 'image': 'https://picsum.photos/200?random=1'},
+        {'id': 42, 'title': 'Django for Beginners', 'price': 35.00, 'category': 'books', 'description': 'A guide to Django web framework', 'image': 'https://picsum.photos/200?random=1'},
     ]
     products.extend(custom_products)
     cache.set(cache_key, products, 1800)
