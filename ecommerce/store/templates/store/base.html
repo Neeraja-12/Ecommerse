@@ -48,6 +48,14 @@
     .toast.success { background-color: #10b981; }
     .toast.error { background-color: #ef4444; }
     .toast.info { background-color: #3b82f6; }
+      /* Force password dots to show */
+    input[type="password"] {
+      -webkit-text-security: disc;
+      color: #000;
+    }
+    input[type="password"]::placeholder {
+      color: #9ca3af;
+    }
   </style>
 </head>
 
