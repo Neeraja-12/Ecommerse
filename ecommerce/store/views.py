@@ -100,13 +100,13 @@ def get_all_products():
 
     # Append custom products
     custom_products = [
-        {'id': 21, 'title': 'Stylish Hat', 'price': 25.99, 'category': 'fashion', 'description': 'Cool unisex fashion hat', 'image': 'https://picsum.photos/200?random=1'},
-        {'id': 22, 'title': 'Designer Watch', 'price': 150.00, 'category': 'fashion', 'description': 'Luxury stainless steel wristwatch', 'image': 'https://picsum.photos/200?random=1'},
-        {'id': 23, 'title': 'Leather Handbag', 'price': 110.50, 'category': 'fashion', 'description': 'Elegant premium leather handbag', 'image': 'https://picsum.photos/200?random=1'},
-        {'id': 31, 'title': 'Modern Lamp', 'price': 45.50, 'category': 'home', 'description': 'Stylish bedside lamp', 'image': 'https://picsum.photos/200?random=1'},
-        {'id': 32, 'title': 'Wooden Chair', 'price': 89.00, 'category': 'home', 'description': 'Comfortable oak chair', 'image': 'https://picsum.photos/200?random=1'},
-        {'id': 41, 'title': 'Python Programming', 'price': 30.00, 'category': 'books', 'description': 'Learn Python step-by-step', 'image': 'https://picsum.photos/200?random=1'},
-        {'id': 42, 'title': 'Django for Beginners', 'price': 35.00, 'category': 'books', 'description': 'A guide to Django web framework', 'image': 'https://picsum.photos/200?random=1'},
+        {'id': 21, 'title': 'Stylish Hat', 'price': 25.99, 'category': 'fashion', 'description': 'Cool unisex fashion hat', 'image': '/static/store/images/hat.jpg'},
+        {'id': 22, 'title': 'Designer Watch', 'price': 150.00, 'category': 'fashion', 'description': 'Luxury stainless steel wristwatch', 'image': '/static/store/images/watch.jpg'},
+        {'id': 23, 'title': 'Leather Handbag', 'price': 110.50, 'category': 'fashion', 'description': 'Elegant premium leather handbag', 'image': '/static/store/images/handbag.jpg'},
+        {'id': 31, 'title': 'Modern Lamp', 'price': 45.50, 'category': 'home', 'description': 'Stylish bedside lamp', 'image': '/static/store/images/lamp.jpg'},
+        {'id': 32, 'title': 'Wooden Chair', 'price': 89.00, 'category': 'home', 'description': 'Comfortable oak chair', 'image': '/static/store/images/chair.jpg'},
+        {'id': 41, 'title': 'Python Programming', 'price': 30.00, 'category': 'books', 'description': 'Learn Python step-by-step', 'image': '/static/store/images/python.jpg'},
+        {'id': 42, 'title': 'Django for Beginners', 'price': 35.00, 'category': 'books', 'description': 'A guide to Django web framework', 'image': '/static/store/images/django.jpg'},
     ]
     products.extend(custom_products)
     cache.set(cache_key, products, 1800)
