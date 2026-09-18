@@ -2,85 +2,143 @@
 {% block title %}Checkout | MyAmazon{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-10">
+<div class="container mx-auto px-4 py-10 max-w-6xl">
   <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Checkout</h1>
 
   {% if messages %}
-    <div class="mb-6">
+    <div class="mb-6 space-y-2">
       {% for message in messages %}
-        <div class="p-4 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+        <div class="p-4 rounded-lg
+          {% if message.tags == 'error' %}bg-red-100 text-red-700
+          {% elif message.tags == 'success' %}bg-green-100 text-green-700
+          {% else %}bg-blue-100 text-blue-700{% endif %}">
           {{ message }}
         </div>
       {% endfor %}
     </div>
   {% endif %}
 
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+  <form method="POST" novalidate class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    {% csrf_token %}
 
     <!-- 📝 Shipping Information -->
     <div class="bg-white p-6 rounded-2xl shadow-md">
-      <h2 class="text-xl font-semibold mb-4">Shipping Information</h2>
 
-      <form method="POST">
-        {% csrf_token %}
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
-            <input type="text" name="first_name" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
-            <input type="text" name="last_name" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-          </div>
+      <!-- Existing addresses -->
+      {% if addresses %}
+        <h2 class="text-xl font-semibold mb-4">📍 Choose a Shipping Address</h2>
+
+        <div class="space-y-3 mb-6">
+          {% for addr in addresses %}
+          <label class="flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition
+                        {% if addr.is_default %}border-blue-500 bg-blue-50{% else %}border-gray-200 hover:border-blue-300{% endif %}">
+            <input type="radio" name="selected_address" value="{{ addr.id }}"
+                   {% if addr.is_default %}checked{% endif %}
+                   class="mt-1 accent-blue-600">
+            <div class="flex-1">
+              <div class="font-semibold text-gray-800">{{ addr.full_name }}</div>
+              <div class="text-sm text-gray-600">
+                {{ addr.address_line1 }}{% if addr.address_line2 %}, {{ addr.address_line2 }}{% endif %}<br>
+                {{ addr.city }}, {{ addr.state }} {{ addr.postal_code }}<br>
+                {{ addr.country }} · 📞 {{ addr.phone_number }}
+              </div>
+            </div>
+            {% if addr.is_default %}
+            <span class="text-xs bg-blue-500 text-white px-2 py-1 rounded-full">Default</span>
+            {% endif %}
+          </label>
+          {% endfor %}
+
+          <label class="flex items-center gap-3 p-4 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-blue-400 transition">
+            <input type="radio" name="selected_address" value="new"
+                   class="accent-blue-600"
+                   onchange="document.getElementById('new-address-form').classList.remove('hidden')">
+            <span class="font-semibold text-gray-700">➕ Add a new address</span>
+          </label>
+        </div>
+      {% else %}
+        <input type="hidden" name="selected_address" value="new">
+        <h2 class="text-xl font-semibold mb-4">📍 Shipping Address</h2>
+        <p class="text-sm text-gray-500 mb-4">You don't have any saved addresses yet. Please add one below.</p>
+      {% endif %}
+
+      <!-- New address form -->
+      <div id="new-address-form"
+           class="{% if addresses %}hidden{% endif %} space-y-4 {% if addresses %}pt-6 border-t{% endif %}">
+
+        <h3 class="font-semibold text-gray-700 mb-2">Address Details</h3>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+          {{ address_form.full_name }}
+          {% if address_form.full_name.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ address_form.full_name.errors.0 }}</p>
+          {% endif %}
         </div>
 
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-          <input type="email" name="email" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Address Line 1 *</label>
+          {{ address_form.address_line1 }}
         </div>
 
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Address *</label>
-          <input type="text" name="address" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Address Line 2</label>
+          {{ address_form.address_line2 }}
         </div>
 
-        <div class="grid grid-cols-2 gap-4 mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">City *</label>
-            <input type="text" name="city" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            {{ address_form.city }}
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">ZIP Code *</label>
-            <input type="text" name="zip_code" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            <label class="block text-sm font-medium text-gray-700 mb-1">State *</label>
+            {{ address_form.state }}
           </div>
         </div>
 
-        <!-- 💳 Payment Method -->
-        <h2 class="text-xl font-semibold mb-4 mt-6">Payment Method</h2>
-        <div class="space-y-2 mb-6">
-          <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-            <input type="radio" name="payment_method" value="credit_card" class="mr-2" checked>
-            <span>Credit/Debit Card</span>
-          </label>
-          <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-            <input type="radio" name="payment_method" value="paypal" class="mr-2">
-            <span>PayPal</span>
-          </label>
-          <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-            <input type="radio" name="payment_method" value="cash_on_delivery" class="mr-2">
-            <span>Cash on Delivery</span>
-          </label>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Postal Code *</label>
+            {{ address_form.postal_code }}
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Country *</label>
+            {{ address_form.country }}
+          </div>
         </div>
 
-        <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-semibold">
-          Place Order - ${{ grand_total|floatformat:2 }}
-        </button>
-      </form>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
+          {{ address_form.phone_number }}
+        </div>
+
+        <label class="flex items-center gap-2">
+          {{ address_form.is_default }}
+          <span class="text-sm text-gray-700">Set as my default address</span>
+        </label>
+      </div>
+
+      <!-- 💳 Payment Method -->
+      <h2 class="text-xl font-semibold mb-4 mt-8">💳 Payment Method</h2>
+      <div class="space-y-2">
+        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+          <input type="radio" name="payment_method" value="credit_card" class="mr-2 accent-blue-600" checked>
+          <span>💳 Credit / Debit Card</span>
+        </label>
+        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+          <input type="radio" name="payment_method" value="paypal" class="mr-2 accent-blue-600">
+          <span>🅿️ PayPal</span>
+        </label>
+        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+          <input type="radio" name="payment_method" value="cash_on_delivery" class="mr-2 accent-blue-600">
+          <span>💵 Cash on Delivery</span>
+        </label>
+      </div>
     </div>
 
     <!-- 🛒 Order Summary -->
-    <div class="bg-white p-6 rounded-2xl shadow-md h-fit">
+    <div class="bg-white p-6 rounded-2xl shadow-md h-fit lg:sticky lg:top-6">
       <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
 
       {% if cart_items %}
@@ -89,11 +147,13 @@
         <div class="flex justify-between items-center py-4">
           <div class="flex items-center space-x-3">
             {% if item.image %}
-            <img src="{{ item.image }}" alt="{{ item.name }}" class="w-12 h-12 object-cover rounded">
+              <img src="{{ item.image }}" alt="{{ item.title }}" class="w-12 h-12 object-cover rounded">
+            {% else %}
+              <div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-xl">🛒</div>
             {% endif %}
             <div>
-              <span class="text-gray-800 font-medium">{{ item.name }}</span>
-              <p class="text-sm text-gray-600">Qty: {{ item.quantity }}</p>
+              <span class="text-gray-800 font-medium">{{ item.title }}</span>
+              <p class="text-sm text-gray-600">Qty: {{ item.quantity }} × ${{ item.price }}</p>
             </div>
           </div>
           <span class="text-gray-900 font-semibold">${{ item.subtotal|floatformat:2 }}</span>
@@ -101,35 +161,86 @@
         {% endfor %}
       </div>
 
-      <div class="border-t border-gray-300 pt-4 space-y-2">
+      <div class="border-t border-gray-300 pt-4 space-y-2 mt-2">
         <div class="flex justify-between">
-          <span>Subtotal</span>
+          <span class="text-gray-600">Subtotal</span>
           <span>${{ total_price|floatformat:2 }}</span>
         </div>
         <div class="flex justify-between">
-          <span>Shipping</span>
-          <span>${{ shipping_cost|floatformat:2 }}</span>
+          <span class="text-gray-600">Shipping</span>
+          <span>
+            {% if shipping == 0 %}
+              <span class="text-green-600 font-semibold">FREE</span>
+            {% else %}
+              ${{ shipping|floatformat:2 }}
+            {% endif %}
+          </span>
         </div>
-        {% if total_price < 50 %}
-<div class="text-sm text-green-600">
-  ⭐ Add ${{ 50|add:"0"|floatformat:2 }} more for free shipping!
-</div>
-{% endif %}
-        <div class="flex justify-between text-lg font-bold mt-2 pt-2 border-t border-gray-300">
+        <div class="flex justify-between">
+          <span class="text-gray-600">Tax (5%)</span>
+          <span>${{ tax|floatformat:2 }}</span>
+        </div>
+
+        {% if shipping_remaining > 0 %}
+        <div class="text-sm text-orange-600 bg-orange-50 rounded-lg p-2 text-center">
+          ⭐ Add ${{ shipping_remaining|floatformat:2 }} more for FREE shipping!
+        </div>
+        {% endif %}
+
+        <div class="flex justify-between text-lg font-bold mt-2 pt-3 border-t border-gray-300">
           <span>Total</span>
-          <span>${{ grand_total|floatformat:2 }}</span>
+          <span class="text-green-600">${{ grand_total|floatformat:2 }}</span>
         </div>
       </div>
+
+      <button type="submit"
+              class="w-full mt-6 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-semibold">
+        Place Order — ${{ grand_total|floatformat:2 }}
+      </button>
+
+      <p class="text-xs text-gray-500 text-center mt-3">
+        By placing this order you agree to our terms
+      </p>
+
       {% else %}
       <div class="text-center py-8">
         <p class="text-gray-500 text-lg">Your cart is empty.</p>
-        <a href="{% url 'home' %}" class="inline-block mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+        <a href="{% url 'home' %}"
+           class="inline-block mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
           Continue Shopping
         </a>
       </div>
       {% endif %}
     </div>
 
-  </div>
+  </form>
 </div>
+
+<style>
+  /* Style Django form widgets uniformly */
+  #new-address-form input[type="text"],
+  #new-address-form input[type="email"],
+  #new-address-form input[type="tel"],
+  #new-address-form select,
+  #new-address-form textarea {
+    width: 100%;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.75rem;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  #new-address-form input:focus,
+  #new-address-form select:focus,
+  #new-address-form textarea:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  }
+  #new-address-form input[type="checkbox"] {
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: #2563eb;
+  }
+</style>
 {% endblock %}

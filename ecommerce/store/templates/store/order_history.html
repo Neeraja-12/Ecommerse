@@ -3,22 +3,95 @@
 {% block title %}Order History | MyAmazon{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-10 max-w-4xl">
-  <h1 class="text-3xl font-bold text-gray-800 mb-8">Order history</h1>
+<div class="container mx-auto px-4 py-10 max-w-4xl order-history-page text-black">
+
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-black">Order History</h1>
+    <a href="{% url 'track_order' %}" class="text-sm text-blue-600 hover:underline font-semibold">
+      🚚 Track an order →
+    </a>
+  </div>
+
   {% if orders %}
     <div class="space-y-4">
       {% for order in orders %}
-        <a href="{% url 'order_detail' order.id %}" class="block bg-white p-6 rounded-2xl shadow-md hover:shadow-lg">
-          <div class="flex justify-between gap-4">
-            <span class="font-semibold">Order #{{ order.id }}</span>
-            <span class="capitalize text-blue-700">{{ order.status }}</span>
+        <a href="{% url 'order_detail' order.id %}"
+           class="block bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition border border-gray-200">
+
+          <div class="flex justify-between items-start gap-4 mb-2">
+            <span class="font-bold text-lg text-black">Order #{{ order.id }}</span>
+
+            <!-- Status badge — KEEPS its own color, excluded from the global black override -->
+            <span class="status-badge px-3 py-1 rounded-full text-xs font-bold
+              {% if order.status == 'delivered' %}bg-green-100 text-green-700
+              {% elif order.status == 'cancelled' or order.status == 'refunded' %}bg-red-100 text-red-700
+              {% elif order.status == 'shipped' or order.status == 'out_for_delivery' %}bg-blue-100 text-blue-700
+              {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+              {{ order.get_status_display }}
+            </span>
           </div>
-          <p class="text-gray-600 mt-2">{{ order.created_at|date:"F j, Y" }} · ₹{{ order.total_amount }}</p>
+
+          <div class="flex flex-wrap justify-between gap-2 text-sm text-black">
+            <span class="text-black">📅 {{ order.created_at|date:"F j, Y" }}</span>
+            {% if order.tracking_number %}
+              <span class="text-black font-mono">📦 {{ order.tracking_number }}</span>
+            {% endif %}
+            <span class="font-bold text-black">${{ order.total_price }}</span>
+          </div>
+
+          <!-- Progress bar -->
+          <div class="mt-4 w-full bg-gray-200 rounded-full h-1.5">
+            <div class="bg-green-500 h-1.5 rounded-full transition-all"
+                 style="width: {{ order.get_status_percentage }}%"></div>
+          </div>
         </a>
       {% endfor %}
     </div>
+
   {% else %}
-    <div class="bg-white p-8 rounded-2xl shadow-md text-center text-gray-600">You have not placed any orders yet.</div>
+    <div class="bg-white p-12 rounded-2xl shadow-md text-center border border-gray-200">
+      <div class="text-6xl mb-4">📦</div>
+      <h2 class="text-xl font-bold text-black mb-2">No orders yet</h2>
+      <p class="text-black mb-6">Once you place an order, it will show up here.</p>
+      <a href="{% url 'home' %}"
+         class="inline-block bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 font-semibold">
+        Start Shopping
+      </a>
+    </div>
   {% endif %}
+
 </div>
+
+<style>
+  /* Force all text to black on the order history page */
+  .order-history-page,
+  .order-history-page span,
+  .order-history-page p,
+  .order-history-page h1,
+  .order-history-page h2,
+  .order-history-page a {
+    color: #000;
+  }
+
+  /* Exception: status badges keep their original colors */
+  .order-history-page .status-badge {
+    color: inherit;
+  }
+  .order-history-page .status-badge.text-green-700 { color: #15803d !important; }
+  .order-history-page .status-badge.text-red-700   { color: #b91c1c !important; }
+  .order-history-page .status-badge.text-blue-700  { color: #1d4ed8 !important; }
+  .order-history-page .status-badge.text-yellow-700 { color: #a16207 !important; }
+
+  /* Keep the "Track an order" link blue */
+  .order-history-page a.text-blue-600,
+  .order-history-page a.text-blue-600:hover {
+    color: #2563eb !important;
+  }
+
+  /* Keep Start Shopping button text white */
+  .order-history-page a.bg-gradient-to-r,
+  .order-history-page a.bg-gradient-to-r:hover {
+    color: #fff !important;
+  }
+</style>
 {% endblock %}

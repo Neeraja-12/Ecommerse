@@ -1,12 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.Python
+*.log
+
+# Virtual environments
 myenv/
 venv/
-ecommerce/myenv/
-__pycache__/
-*.pyc
-.env
+env/
+ENV/
+
+# Django
 db.sqlite3
-ecommerce/db.sqlite3
-ecommerce/debug.log
-ecommerce.zipecommerce_duplicate_backup/
+db.sqlite3-journal
+staticfiles/
+media/
+debug.log
+
+# Backups / archives
 ecommerce.zip
 ecommerce_duplicate_backup/
+*.zip
+
+# Environment
+.env
+.env.*
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Misc
+vercel.json
+.python-version

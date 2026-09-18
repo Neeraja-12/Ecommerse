@@ -1,18 +1,47 @@
 {% extends 'store/base.html' %}
-
 {% block title %}Track Order | MyAmazon{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-12 max-w-xl">
-  <div class="bg-white p-8 rounded-2xl shadow-md">
-    <h1 class="text-3xl font-bold text-gray-800 mb-3 text-center">Track your order</h1>
-    <p class="text-gray-600 text-center mb-6">Enter your order ID or tracking number.</p>
-    <form method="post" class="space-y-4">
-      {% csrf_token %}
-      <label for="order-number" class="block font-medium text-gray-700">Order number</label>
-      <input id="order-number" name="order_number" required class="w-full border rounded-lg px-4 py-3" placeholder="e.g. 42 or TRKABCD12345678">
-      <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-semibold">Find order</button>
-    </form>
-  </div>
+<div class="container mx-auto px-4 py-12 max-w-xl text-black">
+
+  <h1 class="text-3xl font-bold text-black mb-2 text-center">Track Your Order</h1>
+  <p class="text-center text-black mb-8">Enter your order ID or tracking number to see its status.</p>
+
+  <form method="POST" class="bg-white rounded-2xl shadow-md p-6 border border-gray-200">
+    {% csrf_token %}
+
+    <label for="order_number" class="block mb-2 font-semibold text-black">
+      Order Number
+    </label>
+
+    <input type="text"
+           id="order_number"
+           name="order_number"
+           placeholder="e.g. 32 or TRKCWTC25421626"
+           required
+           class="w-full px-4 py-3 border border-gray-300 rounded-xl mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white">
+
+    <button type="submit"
+            class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition font-semibold">
+      🔍 Track Order
+    </button>
+  </form>
+
+  <p class="text-center text-black text-sm mt-6">
+    You can find your order ID and tracking number in
+    <a href="{% url 'order_history' %}" class="text-blue-600 hover:underline font-semibold">My Orders</a>.
+  </p>
+
 </div>
+
+<style>
+  /* Ensure input text is pure black, placeholder is gray */
+  #order_number {
+    color: #000 !important;
+    background-color: #fff !important;
+  }
+  #order_number::placeholder {
+    color: #9ca3af !important;
+  }
+</style>
 {% endblock %}

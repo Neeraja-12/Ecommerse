@@ -34,7 +34,7 @@ class StorePageTests(TestCase):
             'terms',
             'subscribe_newsletter',
             'cart',
-            'track_order_by_number',
+            'track_order',
         ):
             with self.subTest(name=name):
                 response = self.client.get(reverse(name))

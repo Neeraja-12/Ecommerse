@@ -51,7 +51,7 @@
                             <a href="{% url 'track_order_detail' order.id %}" 
                                class="text-blue-600 hover:text-blue-900 mr-4">View Details</a>
                             {% if order.tracking_number %}
-                            <a href="{% url 'track_order_by_number' %}?tracking_number={{ order.tracking_number }}" 
+                            <a href="{% url 'track_order' %}?tracking_number={{ order.tracking_number }}" 
                                class="text-green-600 hover:text-green-900">Share Tracking</a>
                             {% endif %}
                         </td>

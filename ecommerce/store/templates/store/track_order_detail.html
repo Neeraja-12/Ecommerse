@@ -2,125 +2,164 @@
 {% block title %}Track Order #{{ order.id }} | MyAmazon{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8 max-w-4xl">
-    <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">Order #{{ order.id }}</h1>
-        <span class="px-4 py-2 rounded-full text-sm font-semibold
-            {% if order.status == 'delivered' %}bg-green-100 text-green-800
-            {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
-            {% else %}bg-blue-100 text-blue-800{% endif %}">
-            {{ order.status|title }}
-        </span>
-    </div>
+<div class="container mx-auto px-4 py-10 max-w-3xl text-black">
 
-    <!-- Progress Bar -->
-    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
-        <div class="flex justify-between mb-2">
-            <span class="text-sm font-medium text-gray-700">Order Progress</span>
-            <span class="text-sm font-medium text-blue-600">{{ status_percentage }}%</span>
-        </div>
-        <div class="w-full bg-gray-200 rounded-full h-2.5">
-            <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ status_percentage }}%"></div>
-        </div>
-    </div>
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold text-black">Order #{{ order.id }}</h1>
+    <span class="px-3 py-1 rounded-full text-xs font-bold
+      {% if order.status == 'delivered' %}bg-green-100 text-green-700
+      {% elif order.status == 'cancelled' or order.status == 'refunded' %}bg-red-100 text-red-700
+      {% elif order.status == 'shipped' or order.status == 'out_for_delivery' %}bg-blue-100 text-blue-700
+      {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+      {{ order.get_status_display }}
+    </span>
+  </div>
 
-    <!-- Tracking Timeline -->
-    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
-        <h2 class="text-xl font-semibold mb-4">Delivery Status</h2>
-        <div class="space-y-4">
-            {% for step in status_timeline %}
-            <div class="flex items-center">
-                <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center
-                    {% if step.completed %}bg-green-500 text-white
-                    {% else %}bg-gray-300 text-gray-600{% endif %}">
-                    {% if step.completed %}✓{% else %}{{ forloop.counter }}{% endif %}
-                </div>
-                <div class="ml-4">
-                    <p class="font-medium {% if step.completed %}text-gray-900{% else %}text-gray-500{% endif %}">
-                        {{ step.label }}
-                    </p>
-                    {% if step.time %}
-                    <p class="text-sm text-gray-500">{{ step.time|date:"M d, Y g:i A" }}</p>
-                    {% endif %}
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
+  <!-- Progress -->
+  <div class="bg-white rounded-2xl shadow-md p-6 mb-6 border border-gray-200">
+    <h2 class="text-lg font-bold mb-4 text-black">Order Progress</h2>
 
-    <!-- Order Details -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Shipping Information -->
-        <div class="bg-white rounded-xl shadow-md p-6">
-            <h2 class="text-xl font-semibold mb-4">Shipping Information</h2>
-            {% if order.shipping_address %}
-            <div class="space-y-2">
-                <p><strong>{{ order.shipping_address.full_name }}</strong></p>
-                <p>{{ order.shipping_address.address_line1 }}</p>
-                {% if order.shipping_address.address_line2 %}
-                <p>{{ order.shipping_address.address_line2 }}</p>
-                {% endif %}
-                <p>{{ order.shipping_address.city }}, {{ order.shipping_address.state }} {{ order.shipping_address.postal_code }}</p>
-                <p>{{ order.shipping_address.country }}</p>
-                <p class="mt-2">📞 {{ order.shipping_address.phone_number }}</p>
-            </div>
-            {% endif %}
-            
-            {% if order.tracking_number %}
-            <div class="mt-4 p-4 bg-blue-50 rounded-lg">
-                <p class="font-semibold">Tracking Number: {{ order.tracking_number }}</p>
-                <p class="text-sm">Carrier: {{ order.carrier|default:"MyAmazon Logistics" }}</p>
-                {% if order.estimated_delivery %}
-                <p class="text-sm">Estimated Delivery: {{ order.estimated_delivery|date:"M d, Y" }}</p>
-                {% endif %}
-            </div>
-            {% endif %}
-        </div>
-
-        <!-- Order Summary -->
-        <div class="bg-white rounded-xl shadow-md p-6">
-            <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
-            <div class="space-y-3">
-                {% for item in order_items %}
-                <div class="flex justify-between items-center py-2 border-b">
-                    <div>
-                        <p class="font-medium">{{ item.product_title }}</p>
-                        <p class="text-sm text-gray-600">Qty: {{ item.quantity }}</p>
-                    </div>
-                    <p class="font-medium">${{ item.get_total_price }}</p>
-                </div>
-                {% endfor %}
-                <div class="flex justify-between items-center pt-2 border-t font-bold">
-                    <span>Total</span>
-                    <span>${{ order.total_price }}</span>
-                </div>
-            </div>
-        </div>
+    <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+      <div class="bg-green-500 h-2 rounded-full transition-all"
+           style="width: {{ order.get_status_percentage }}%"></div>
     </div>
+    <p class="text-sm text-black text-center font-semibold">
+      {{ order.get_status_percentage }}% complete
+    </p>
+  </div>
 
-    <!-- Share Tracking -->
-    {% if order.tracking_number %}
-    <div class="bg-white rounded-xl shadow-md p-6 mt-6">
-        <h2 class="text-xl font-semibold mb-4">Share Tracking</h2>
-        <p class="text-gray-600 mb-3">Share this order's tracking status with others:</p>
-        <div class="flex">
-            <input type="text" value="{{ request.scheme }}://{{ request.get_host }}{% url 'track_order_by_number' %}?tracking_number={{ order.tracking_number }}" 
-                   class="flex-1 px-4 py-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
-            <button onclick="copyTrackingLink()" 
-                    class="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700 transition">
-                Copy Link
-            </button>
-        </div>
+  <!-- Delivery Status -->
+  <div class="bg-white rounded-2xl shadow-md p-6 mb-6 border border-gray-200">
+    <h2 class="text-lg font-bold mb-4 text-black">Delivery Status</h2>
+
+    <div class="space-y-3 text-sm text-black">
+      {% if order.tracking_number %}
+      <div class="flex justify-between">
+        <span class="font-semibold text-black">Tracking Number:</span>
+        <code class="font-mono text-black">{{ order.tracking_number }}</code>
+      </div>
+      {% endif %}
+
+      {% if order.carrier %}
+      <div class="flex justify-between">
+        <span class="font-semibold text-black">Carrier:</span>
+        <span class="text-black">{{ order.carrier }}</span>
+      </div>
+      {% endif %}
+
+      {% if order.estimated_delivery %}
+      <div class="flex justify-between">
+        <span class="font-semibold text-black">Estimated Delivery:</span>
+        <span class="text-black">{{ order.estimated_delivery|date:"M d, Y" }}</span>
+      </div>
+      {% endif %}
+
+      {% if order.shipped_at %}
+      <div class="flex justify-between">
+        <span class="font-semibold text-black">Shipped At:</span>
+        <span class="text-black">{{ order.shipped_at|date:"M d, Y g:i A" }}</span>
+      </div>
+      {% endif %}
+
+      {% if order.delivered_at %}
+      <div class="flex justify-between">
+        <span class="font-semibold text-black">Delivered At:</span>
+        <span class="text-black">{{ order.delivered_at|date:"M d, Y g:i A" }}</span>
+      </div>
+      {% endif %}
     </div>
+  </div>
+
+  <!-- Shipping Address -->
+  {% if order.shipping_address %}
+  <div class="bg-white rounded-2xl shadow-md p-6 mb-6 border border-gray-200">
+    <h2 class="text-lg font-bold mb-4 text-black">Shipping Information</h2>
+    <p class="font-bold text-black">{{ order.shipping_address.full_name }}</p>
+    <p class="text-black">{{ order.shipping_address.address_line1 }}</p>
+    {% if order.shipping_address.address_line2 %}
+      <p class="text-black">{{ order.shipping_address.address_line2 }}</p>
     {% endif %}
+    <p class="text-black">{{ order.shipping_address.city }}, {{ order.shipping_address.state }} {{ order.shipping_address.postal_code }}</p>
+    <p class="text-black">{{ order.shipping_address.country }}</p>
+    {% if order.shipping_address.phone_number %}
+      <p class="text-black mt-2">📞 {{ order.shipping_address.phone_number }}</p>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Order Summary -->
+  <div class="bg-white rounded-2xl shadow-md p-6 mb-6 border border-gray-200">
+    <h2 class="text-lg font-bold mb-4 text-black">Order Summary</h2>
+
+    <div class="space-y-3 text-black">
+      {% for item in order.items.all %}
+      <div class="flex items-center gap-3 border-b border-gray-100 pb-3">
+        {% if item.product and item.product.image %}
+          <img src="{{ item.product.image }}" class="w-12 h-12 object-cover rounded-lg">
+        {% else %}
+          <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center text-xl">🛒</div>
+        {% endif %}
+        <div class="flex-1">
+          <p class="font-semibold text-black">{{ item.product_title }}</p>
+          <p class="text-sm text-black">Qty: {{ item.quantity }} × ${{ item.price }}</p>
+        </div>
+        <p class="font-bold text-black">${{ item.get_total_price }}</p>
+      </div>
+      {% endfor %}
+
+      <div class="flex justify-between text-lg font-bold text-black pt-3">
+        <span>Total</span>
+        <span>${{ order.total_price }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Share Tracking -->
+  {% if order.tracking_number %}
+  <div class="bg-white rounded-2xl shadow-md p-6 mb-6 border border-gray-200">
+    <h2 class="text-lg font-bold mb-2 text-black">Share Tracking</h2>
+    <p class="text-sm text-black mb-3">Share this order's tracking link with others:</p>
+    <div class="flex">
+      <input type="text" id="share-url"
+             value="{{ request.scheme }}://{{ request.get_host }}{% url 'track_order' %}?tracking_number={{ order.tracking_number }}"
+             class="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white"
+             readonly>
+      <button onclick="copyTrackingLink()"
+              class="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700 transition font-semibold">
+        Copy Link
+      </button>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Actions -->
+  <div class="flex gap-3 mt-6">
+    <a href="{% url 'order_history' %}"
+       class="flex-1 text-center border-2 border-gray-300 text-black py-3 rounded-xl hover:bg-gray-100 font-semibold">
+      ← Back to Orders
+    </a>
+    <a href="{% url 'order_detail' order.id %}"
+       class="flex-1 text-center bg-black text-white py-3 rounded-xl hover:bg-gray-800 font-semibold">
+      Order Details →
+    </a>
+  </div>
+
 </div>
 
 <script>
 function copyTrackingLink() {
-    const linkInput = document.querySelector('input[type="text"]');
-    linkInput.select();
+  const input = document.getElementById('share-url');
+  input.select();
+  input.setSelectionRange(0, 99999);
+  navigator.clipboard.writeText(input.value).then(() => {
+    if (typeof showToast === 'function') showToast('Link copied to clipboard!', 'success');
+    else alert('Link copied!');
+  }).catch(() => {
     document.execCommand('copy');
-    alert('Tracking link copied to clipboard!');
+    if (typeof showToast === 'function') showToast('Link copied!', 'success');
+    else alert('Link copied!');
+  });
 }
 </script>
 {% endblock %}

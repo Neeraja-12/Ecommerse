@@ -1,18 +1,21 @@
+# store/models.py
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.core.validators import MinValueValidator
-from decimal import Decimal
+
+
+# ============================================================
+# CATEGORY
+# ============================================================
 
 class Category(models.Model):
-    """
-    Main category model for products
-    """
+    """Main category model for products."""
     name = models.CharField(max_length=255, unique=True)
     image = models.ImageField(upload_to='categories/', null=True, blank=True)
     description = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)  # Remove default
-    updated_at = models.DateTimeField(auto_now=True)      # Remove default
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "Category"
@@ -22,42 +25,45 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+
+# ============================================================
+# PRODUCT
+# ============================================================
+
 class Product(models.Model):
-    """
-    Main product model
-    """
+    """Main product model."""
     title = models.CharField(max_length=255)
     description = models.TextField()
     price = models.DecimalField(
-        max_digits=10, 
+        max_digits=10,
         decimal_places=2,
         validators=[MinValueValidator(0.01)]
     )
     discounted_price = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2, 
-        null=True, 
+        max_digits=10,
+        decimal_places=2,
+        null=True,
         blank=True,
         validators=[MinValueValidator(0.01)]
     )
-    image = models.URLField(blank=True, null=True)  # for API images
-    local_image = models.ImageField(upload_to='products/', blank=True, null=True)  # for manual uploads
+    image = models.URLField(blank=True, null=True)
+    local_image = models.ImageField(upload_to='products/', blank=True, null=True)
     category = models.ForeignKey(
-        Category, 
-        on_delete=models.CASCADE, 
-        null=True, 
+        Category,
+        on_delete=models.CASCADE,
+        null=True,
         blank=True,
         related_name='products'
     )
     in_stock = models.BooleanField(default=True)
     stock_quantity = models.PositiveIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)  # Remove default
-    updated_at = models.DateTimeField(auto_now=True)      # Remove default
-    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     # Product metadata
     sku = models.CharField(max_length=100, unique=True, blank=True, null=True)
-    weight = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)  # in kg
-    dimensions = models.CharField(max_length=100, blank=True, null=True)  # "10x5x2"
+    weight = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
+    dimensions = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
         verbose_name = "Product"
@@ -74,39 +80,39 @@ class Product(models.Model):
 
     @property
     def is_on_sale(self):
-        """Check if product has a discount"""
         return self.discounted_price is not None and self.discounted_price < self.price
 
     @property
     def discount_percentage(self):
-        """Calculate discount percentage"""
         if self.is_on_sale:
             return int(((self.price - self.discounted_price) / self.price) * 100)
         return 0
 
     def get_final_price(self):
-        """Get the final price after discount"""
         return self.discounted_price if self.is_on_sale else self.price
 
+    @property
+    def average_rating(self):
+        agg = self.reviews.filter(is_approved=True).aggregate(avg=models.Avg('rating'))
+        return round(agg['avg'] or 0, 1)
+
+    @property
+    def review_count(self):
+        return self.reviews.filter(is_approved=True).count()
+
+
+# ============================================================
+# CART (database-backed; session cart is the active one)
+# ============================================================
+
 class Cart(models.Model):
-    """
-    Shopping cart model supporting both authenticated users and sessions
-    """
-    user = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE, 
-        null=True, 
-        blank=True
-    )
-    product = models.ForeignKey(
-        Product, 
-        on_delete=models.CASCADE
-    )
+    """Shopping cart supporting authenticated users and sessions."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     session_key = models.CharField(max_length=40, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)  # Remove default
-    updated_at = models.DateTimeField(auto_now=True)      # Remove default
-    added_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "Cart"
@@ -119,15 +125,14 @@ class Cart(models.Model):
     def __str__(self):
         return f"{self.product.title} x {self.quantity}"
 
+
+# ============================================================
+# USER ADDRESS
+# ============================================================
+
 class UserAddress(models.Model):
-    """
-    User address model for shipping
-    """
-    user = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE,
-        related_name='addresses'
-    )
+    """User shipping address."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')
     full_name = models.CharField(max_length=100)
     address_line1 = models.CharField(max_length=255)
     address_line2 = models.CharField(max_length=255, blank=True, null=True)
@@ -137,8 +142,8 @@ class UserAddress(models.Model):
     country = models.CharField(max_length=50, default='United States')
     phone_number = models.CharField(max_length=20)
     is_default = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)  # Remove default
-    updated_at = models.DateTimeField(auto_now=True)      # Remove default
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "User Address"
@@ -149,18 +154,21 @@ class UserAddress(models.Model):
         return f"{self.full_name} - {self.address_line1}, {self.city}"
 
     def get_full_address(self):
-        address_parts = [
+        parts = [
             self.address_line1,
             self.address_line2,
             f"{self.city}, {self.state} {self.postal_code}",
-            self.country
+            self.country,
         ]
-        return ', '.join(part for part in address_parts if part)
+        return ', '.join(p for p in parts if p)
+
+
+# ============================================================
+# ORDER + ORDER ITEM
+# ============================================================
 
 class Order(models.Model):
-    """
-    Order model with comprehensive tracking
-    """
+    """Order model with tracking."""
     PAYMENT_CHOICES = [
         ('credit_card', 'Credit Card'),
         ('debit_card', 'Debit Card'),
@@ -168,7 +176,7 @@ class Order(models.Model):
         ('cash_on_delivery', 'Cash on Delivery'),
         ('digital_wallet', 'Digital Wallet'),
     ]
-    
+
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('confirmed', 'Confirmed'),
@@ -179,62 +187,38 @@ class Order(models.Model):
         ('cancelled', 'Cancelled'),
         ('refunded', 'Refunded'),
     ]
-    
-    user = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE,
-        related_name='orders'
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
+    shipping_address = models.ForeignKey(UserAddress, on_delete=models.SET_NULL, null=True)
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_CHOICES, default='credit_card')
+    total_price = models.DecimalField(
+        max_digits=10, decimal_places=2,
+        validators=[MinValueValidator(0.01)]
     )
-    shipping_address = models.ForeignKey(
-        UserAddress, 
-        on_delete=models.SET_NULL, 
-        null=True
-    )
-    payment_method = models.CharField(
-        max_length=20, 
-        choices=PAYMENT_CHOICES, 
-        default='credit_card'
-    )
-    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    order_shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))  # ✅ Add this
-    status = models.CharField(
-        max_length=20, 
-        choices=STATUS_CHOICES, 
-        default='pending'
-    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     is_paid = models.BooleanField(default=False)
 
-    
-    # Payment fields
+    # Payment
     payment_status = models.CharField(
         max_length=20,
-        choices=[
-            ('pending', 'Pending'),
-            ('paid', 'Paid'),
-            ('failed', 'Failed'),
-            ('refunded', 'Refunded'),
-        ],
+        choices=[('pending', 'Pending'), ('paid', 'Paid'),
+                 ('failed', 'Failed'), ('refunded', 'Refunded')],
         default='pending'
     )
     payment_id = models.CharField(max_length=100, blank=True, null=True)
-    
-    # Delivery Tracking Fields
+
+    # Delivery tracking
     tracking_number = models.CharField(max_length=100, blank=True, null=True)
     estimated_delivery = models.DateField(blank=True, null=True)
     shipped_at = models.DateTimeField(blank=True, null=True)
     delivered_at = models.DateTimeField(blank=True, null=True)
     carrier = models.CharField(
-        max_length=100, 
-        blank=True, 
-        null=True, 
-        default='MyAmazon Logistics'
+        max_length=100, blank=True, null=True, default='MyAmazon Logistics'
     )
-    
+
     # Timestamps
-    created_at = models.DateTimeField(auto_now_add=True)  # Remove default
-    updated_at = models.DateTimeField(auto_now=True)      # Remove default
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "Order"
@@ -250,30 +234,21 @@ class Order(models.Model):
         return f"Order #{self.id} - {self.user.username} - {self.status}"
 
     def get_status_percentage(self):
-        """Calculate progress percentage for order status"""
-        status_weights = {
-            'pending': 0,
-            'confirmed': 20,
-            'processing': 40,
-            'shipped': 60,
-            'out_for_delivery': 80,
-            'delivered': 100,
-            'cancelled': 0,
-            'refunded': 0,
+        weights = {
+            'pending': 0, 'confirmed': 20, 'processing': 40,
+            'shipped': 60, 'out_for_delivery': 80, 'delivered': 100,
+            'cancelled': 0, 'refunded': 0,
         }
-        return status_weights.get(self.status, 0)
+        return weights.get(self.status, 0)
 
     def get_status_timeline(self):
-        """Get timeline of order status updates"""
-        timeline = [
-            {
-                'status': 'pending', 
-                'label': 'Order Placed', 
-                'time': self.created_at, 
-                'completed': self.status != 'pending'
-            }
-        ]
-        
+        timeline = [{
+            'status': 'pending',
+            'label': 'Order Placed',
+            'time': self.created_at,
+            'completed': self.status != 'pending',
+        }]
+
         status_flow = [
             ('confirmed', 'Order Confirmed'),
             ('processing', 'Processing'),
@@ -281,51 +256,42 @@ class Order(models.Model):
             ('out_for_delivery', 'Out for Delivery'),
             ('delivered', 'Delivered'),
         ]
-        
-        current_status_index = -1
-        for i, (status, label) in enumerate(status_flow):
+
+        current_index = -1
+        for i, (status, _) in enumerate(status_flow):
             if status == self.status:
-                current_status_index = i
+                current_index = i
                 break
-        
+
         for i, (status, label) in enumerate(status_flow):
-            if i <= current_status_index:
+            if i <= current_index:
                 timeline.append({
                     'status': status,
                     'label': label,
                     'time': self.updated_at,
-                    'completed': True
+                    'completed': True,
                 })
-        
+
         return timeline
 
     def save(self, *args, **kwargs):
-        """Override save to handle status updates"""
         if self.status == 'shipped' and not self.shipped_at:
             self.shipped_at = timezone.now()
         elif self.status == 'delivered' and not self.delivered_at:
             self.delivered_at = timezone.now()
         super().save(*args, **kwargs)
 
+
 class OrderItem(models.Model):
-    """
-    Order items model
-    """
-    order = models.ForeignKey(
-        Order, 
-        on_delete=models.CASCADE, 
-        related_name='items'
-    )
+    """Individual line items in an order."""
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(
-        Product, 
-        on_delete=models.SET_NULL, 
-        null=True,
-        related_name='order_items'
+        Product, on_delete=models.SET_NULL, null=True, related_name='order_items'
     )
     product_title = models.CharField(max_length=200)
     quantity = models.PositiveIntegerField(default=1)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    
+
     class Meta:
         verbose_name = "Order Item"
         verbose_name_plural = "Order Items"
@@ -336,28 +302,21 @@ class OrderItem(models.Model):
     def __str__(self):
         return f"{self.product_title} x {self.quantity} - ${self.get_total_price()}"
 
+
+# ============================================================
+# PRODUCT REVIEW
+# ============================================================
+
 class ProductReview(models.Model):
-    """
-    Product reviews model
-    """
-    product = models.ForeignKey(
-        Product,
-        on_delete=models.CASCADE,
-        related_name='reviews'
-    )
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='reviews'
-    )
-    rating = models.PositiveIntegerField(
-        choices=[(i, i) for i in range(1, 6)]  # 1-5 stars
-    )
-    title = models.CharField(max_length=200)
+    """Product reviews."""
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
+    rating = models.PositiveIntegerField(choices=[(i, i) for i in range(1, 6)])
+    title = models.CharField(max_length=200, blank=True)
     comment = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)  # Remove default
-    updated_at = models.DateTimeField(auto_now=True)      # Remove default
-    is_approved = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_approved = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = "Product Review"
@@ -368,21 +327,16 @@ class ProductReview(models.Model):
     def __str__(self):
         return f"Review for {self.product.title} by {self.user.username}"
 
+
+# ============================================================
+# WISHLIST
+# ============================================================
+
 class Wishlist(models.Model):
-    """
-    User wishlist model
-    """
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='wishlist'
-    )
-    product = models.ForeignKey(
-        Product,
-        on_delete=models.CASCADE,
-        related_name='wishlisted_by'
-    )
-    created_at = models.DateTimeField(auto_now_add=True)  # Remove default
+    """User wishlist."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wishlist')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='wishlisted_by')
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = "Wishlist"
@@ -391,22 +345,46 @@ class Wishlist(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.user.username}'s wishlist - {self.product.title}"
-    
-class OrderTracking(models.Model):
-    STATUS_CHOICES = [
-        ('Order Placed', 'Order Placed'),
-        ('Packed', 'Packed'),
-        ('Shipped', 'Shipped'),
-        ('Out for Delivery', 'Out for Delivery'),
-        ('Delivered', 'Delivered'),
-    ]
-    
-    tracking_id = models.CharField(max_length=100, unique=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Order Placed')
-    estimated_delivery = models.DateField(null=True, blank=True)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    # ... other fields
+        return f"{self.user.username} → {self.product.title}"
+
+
+# ============================================================
+# RECENTLY VIEWED
+# ============================================================
+
+class RecentlyViewed(models.Model):
+    """Track products a user recently viewed."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recently_viewed')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    viewed_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Recently Viewed"
+        verbose_name_plural = "Recently Viewed"
+        unique_together = ('user', 'product')
+        ordering = ['-viewed_at']
 
     def __str__(self):
-        return f"Tracking {self.tracking_id} - {self.status}"
+        return f"{self.user.username} viewed {self.product.title}"
+
+
+# ============================================================
+# ORDER TRACKING
+# ============================================================
+
+class OrderTracking(models.Model):
+    """Optional tracking record keyed by tracking_id."""
+    order = models.OneToOneField(
+        Order, on_delete=models.CASCADE, related_name='tracking',
+        null=True, blank=True
+    )
+    tracking_id = models.CharField(max_length=50, unique=True)
+    status = models.CharField(max_length=50, default='Pending')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Order Tracking"
+        verbose_name_plural = "Order Trackings"
+
+    def __str__(self):
+        return f"{self.tracking_id} — {self.status}"

@@ -63,14 +63,15 @@
 
   <!-- Navbar -->
   <nav class="bg-blue-600 text-white shadow-md sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto flex justify-between items-center px-4 py-3">
-      
-      <a href="{% url 'home' %}" class="text-2xl font-bold flex items-center">
+    <div class="max-w-7xl mx-auto flex justify-between items-center px-4 py-3 gap-4">
+
+      <!-- Logo -->
+      <a href="{% url 'home' %}" class="text-2xl font-bold flex items-center shrink-0">
         <span class="mr-2">🛒</span> My<span class="text-yellow-400">Amazon</span>
       </a>
 
       <!-- Search -->
-      <div class="relative w-1/2">
+      <div class="relative flex-1 max-w-xl hidden md:block">
         <form id="search-form" method="GET" action="{% url 'home' %}">
           <input id="search-input" name="q" value="{{ request.GET.q }}"
             placeholder="Search products..."
@@ -80,20 +81,45 @@
       </div>
 
       <!-- Nav Icons -->
-      <div class="flex items-center space-x-6">
+      <div class="flex items-center space-x-5 text-sm">
+
         {% if user.is_authenticated %}
-          <span class="hidden md:block">Hi, {{ user.username }}</span>
+          <!-- User greeting -->
+          <span class="hidden lg:block text-gray-100">Hi, <strong>{{ user.username }}</strong></span>
+
+          <!-- Wishlist -->
+          <a href="{% url 'wishlist' %}" class="hover:text-yellow-400 flex items-center gap-1" title="My Wishlist">
+            ❤️ <span class="hidden md:inline">Wishlist</span>
+          </a>
+
+          <!-- My Orders -->
+          <a href="{% url 'order_history' %}" class="hover:text-yellow-400 flex items-center gap-1" title="My Orders">
+            📦 <span class="hidden md:inline">My Orders</span>
+          </a>
+
+          <!-- Track Order -->
+          <a href="{% url 'track_order' %}" class="hover:text-yellow-400 flex items-center gap-1" title="Track Order">
+            🚚 <span class="hidden md:inline">Track</span>
+          </a>
+
+          <!-- Account -->
+          <a href="{% url 'account' %}" class="hover:text-yellow-400 flex items-center gap-1" title="My Account">
+            👤 <span class="hidden md:inline">Account</span>
+          </a>
+
+          <!-- Logout -->
           <form method="post" action="{% url 'logout' %}" class="inline">
             {% csrf_token %}
             <button type="submit" class="hover:text-yellow-400">Logout</button>
           </form>
+
         {% else %}
           <a href="{% url 'login' %}" class="hover:text-yellow-400">Login</a>
           <a href="{% url 'signup' %}" class="hover:text-yellow-400 hidden md:inline">Sign Up</a>
         {% endif %}
 
         <!-- Cart -->
-        <a href="{% url 'cart' %}" class="relative hover:text-yellow-400">
+        <a href="{% url 'cart' %}" class="relative hover:text-yellow-400" title="Cart">
           🛒
           <span id="cart-count"
             class="absolute -top-2 -right-2 bg-yellow-400 text-xs text-black px-1.5 rounded-full">
@@ -101,10 +127,18 @@
           </span>
         </a>
 
-        <button id="dark-mode-toggle" class="text-xl">🌙</button>
-        <!-- ✅ Add this link inside your navbar (e.g., after Cart) -->
-
+        <!-- Dark mode -->
+        <button id="dark-mode-toggle" class="text-xl" title="Toggle theme">🌙</button>
       </div>
+    </div>
+
+    <!-- Mobile search bar (below navbar, only shows on small screens) -->
+    <div class="md:hidden px-4 pb-3">
+      <form method="GET" action="{% url 'home' %}">
+        <input name="q" value="{{ request.GET.q }}"
+          placeholder="Search products..."
+          class="w-full px-4 py-2 rounded-full text-black focus:ring-2 focus:ring-yellow-400 outline-none">
+      </form>
     </div>
   </nav>
 
@@ -137,7 +171,7 @@
       <div>
         <h4 class="font-semibold mb-2">About</h4>
         <ul class="space-y-1 text-sm text-gray-300">
-          <li><a href="#" class="hover:text-yellow-400">Company Info</a></li>
+          <li><a href="{% url 'about' %}" class="hover:text-yellow-400">About Us</a></li>
           <li><a href="#" class="hover:text-yellow-400">Careers</a></li>
           <li><a href="#" class="hover:text-yellow-400">Press</a></li>
         </ul>
@@ -145,9 +179,9 @@
       <div>
         <h4 class="font-semibold mb-2">Help</h4>
         <ul class="space-y-1 text-sm text-gray-300">
-          <li><a href="#" class="hover:text-yellow-400">Customer Support</a></li>
-          <li><a href="#" class="hover:text-yellow-400">Shipping</a></li>
-          <li><a href="#" class="hover:text-yellow-400">Returns</a></li>
+          <li><a href="{% url 'faq' %}" class="hover:text-yellow-400">FAQ</a></li>
+          <li><a href="{% url 'shipping' %}" class="hover:text-yellow-400">Shipping</a></li>
+          <li><a href="{% url 'returns' %}" class="hover:text-yellow-400">Returns</a></li>
         </ul>
       </div>
       <div>
@@ -203,6 +237,44 @@
       setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 4000);
     }
 
+    // ❤️ Wishlist toggle
+    async function toggleWishlist(productId, btn) {
+      try {
+        const res = await fetch(`/wishlist/toggle/${productId}/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': csrftoken,
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+        });
+
+        if (res.status === 403 || res.status === 401 || res.redirected) {
+          showToast('Please log in to use the wishlist', 'error');
+          return;
+        }
+
+        const data = await res.json();
+        const msg = data.status === 'added' ? '❤️ Added to wishlist' : 'Removed from wishlist';
+        showToast(msg, 'success');
+
+        // Toggle heart fill
+        if (btn) {
+          const svg = btn.querySelector('svg');
+          if (svg) {
+            svg.setAttribute('fill', data.status === 'added' ? 'currentColor' : 'none');
+          }
+        }
+
+        // Reload if on wishlist page
+        if (data.status === 'removed' && window.location.pathname === '/wishlist/') {
+          setTimeout(() => location.reload(), 500);
+        }
+      } catch (err) {
+        console.error('Wishlist error:', err);
+        showToast('Could not update wishlist', 'error');
+      }
+    }
+
     // 🛒 Cart add
     async function addToCart(productId, qty = 1) {
       try {
@@ -212,10 +284,19 @@
         formData.append('quantity', qty);
         formData.append('csrfmiddlewaretoken', csrftoken);
 
-        const res = await fetch(`/cart/add/${productId}/`, { method: 'POST', body: formData });
-        if (!res.ok) throw new Error('Network error');
-        const data = await res.json();
+        const res = await fetch(`/add_to_cart/${productId}/`, {
+          method: 'POST',
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+          body: formData,
+        });
 
+        if (res.redirected || !res.ok) {
+          // Fall back to a normal form submit
+          window.location.href = `/add_to_cart/${productId}/`;
+          return;
+        }
+
+        const data = await res.json();
         updateCartCount(data.cart_count || 0);
         showToast('Product added to cart!', 'success');
       } catch (err) {
