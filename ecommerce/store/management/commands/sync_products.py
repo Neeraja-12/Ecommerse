@@ -9,9 +9,8 @@ CATEGORY_MAP = {
     "electronics": "Electronics",
 }
 
-# All products hardcoded so sync never depends on external API.
 ALL_PRODUCTS = [
-    # ---------- ELECTRONICS ----------
+    # ---------- ELECTRONICS / MISC ----------
     {'id': 1, 'title': 'Fjallraven Backpack', 'price': 109.95, 'category': 'Electronics',
      'description': 'Your perfect pack for everyday use and walks in the forest.',
      'image': 'https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg'},
@@ -36,8 +35,6 @@ ALL_PRODUCTS = [
     {'id': 8, 'title': 'Pierced Owl Rose Gold Plated', 'price': 10.99, 'category': 'Fashion',
      'description': 'Rose Gold Plated Double Flared Tunnel Plug Earrings.',
      'image': 'https://fakestoreapi.com/img/51UDEzMJVpL._AC_UL640_QL65_ML3_.jpg'},
-
-    # ---------- HARD DRIVES / MISC ----------
     {'id': 9, 'title': 'WD 2TB External Hard Drive', 'price': 64.00, 'category': 'Electronics',
      'description': 'USB 3.0 and USB 2.0 Compatibility Fast data transfers.',
      'image': 'https://fakestoreapi.com/img/61IBBVJvSDL._AC_SY879_.jpg'},
@@ -56,8 +53,6 @@ ALL_PRODUCTS = [
     {'id': 14, 'title': 'Samsung 49-Inch Curved Gaming', 'price': 999.99, 'category': 'Electronics',
      'description': '49 inch super ultrawide 32:9 QLED gaming monitor.',
      'image': 'https://fakestoreapi.com/img/81Zt42ioCgL._AC_SX679_.jpg'},
-
-    # ---------- WOMEN'S CLOTHING ----------
     {'id': 15, 'title': 'Women Snowboard Jacket', 'price': 56.99, 'category': 'Fashion',
      'description': 'Note: The Jackets is US standard size.',
      'image': 'https://fakestoreapi.com/img/51Y5NI-I5jL._AC_UX679_.jpg'},
@@ -103,7 +98,7 @@ ALL_PRODUCTS = [
 
 
 class Command(BaseCommand):
-    help = 'Sync all products into the database (no external API needed)'
+    help = 'Sync all 27 products into the database with correct image URLs'
 
     def handle(self, *args, **options):
         created_count = 0
