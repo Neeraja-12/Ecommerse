@@ -75,7 +75,7 @@ class Command(BaseCommand):
                 'category': category,
                 'in_stock': True,
                 'stock_quantity': 50,
-                'image': p.get('image', ''), 
+                'image': p.get('image', ''),
             }
 
             product, created = Product.objects.update_or_create(
